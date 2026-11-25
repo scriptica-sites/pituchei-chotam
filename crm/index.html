@@ -62,6 +62,12 @@ tbody tr:hover{background:#F7F3EA}
 .pill.s-new{background:#E8E0CC;color:#6A5530}.pill.s-check{background:#F3E3C7;color:#7A5418}.pill.s-noans{background:#EDE3E3;color:#7A3B3B}
 .pill.s-work{background:#E1E8EF;color:#34506B}.pill.s-meet{background:#DDEBDF;color:#2F5E39}.pill.s-met{background:#D3E6D6;color:#244F2E}
 .pill.s-won{background:#2F5E39;color:#fff}.pill.s-lost{background:#ECECEC;color:#666}
+select.st{appearance:none;-webkit-appearance:none;border:1px solid transparent;border-radius:999px;padding:4px 12px 4px 28px;font-size:13px;font-weight:600;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23555' stroke-width='1.6'/%3E%3C/svg%3E");background-position:left 11px center;background-size:10px 6px;background-repeat:no-repeat;min-height:30px;min-width:118px;text-align:right}
+select.st:hover{border-color:var(--gold)}
+select.st.saving{opacity:.5}
+select.st.s-new{background-color:#E8E0CC;color:#6A5530}select.st.s-check{background-color:#F3E3C7;color:#7A5418}select.st.s-noans{background-color:#EDE3E3;color:#7A3B3B}
+select.st.s-work{background-color:#E1E8EF;color:#34506B}select.st.s-meet{background-color:#DDEBDF;color:#2F5E39}select.st.s-met{background-color:#D3E6D6;color:#244F2E}
+select.st.s-won{background-color:#2F5E39;color:#fff}select.st.s-lost{background-color:#ECECEC;color:#666}
 .lvl{font-size:13px;color:var(--ink2)}
 .empty{padding:30px;text-align:center;color:var(--muted)}
 /* mobile cards */
@@ -233,8 +239,8 @@ function render(){
   $('count').textContent=f.length+' מתוך '+it.length+' לידים · פגישות ומעלה: '+met;
   document.querySelectorAll('th[data-k]').forEach(function(th){var a=th.querySelector('.ar');if(a)a.textContent=th.dataset.k===SORT.k?(SORT.dir>0?'▲':'▼'):'';});
   if(!f.length){$('rows').innerHTML='<tr><td colspan="8" class="empty">אין לידים שמתאימים לסינון.</td></tr>';$('cards').innerHTML='<div class="empty">אין לידים שמתאימים לסינון.</div>';return;}
-  $('rows').innerHTML=f.map(function(x){return '<tr tabindex="0" data-row="'+x.row+'"><td>'+esc(x.date.slice(0,10))+'</td><td class="l"><b>'+esc(x.name)+'</b></td><td dir="ltr">'+esc(x.phone)+'</td><td>'+esc(x.city)+'</td><td class="l">'+esc(x.plan)+'</td><td class="lvl">'+esc(x.level)+'</td><td>'+esc(x.srcLabel)+'</td><td><span class="pill '+(STCLS[x.status]||'')+'">'+esc(x.status)+'</span></td></tr>';}).join('');
-  $('cards').innerHTML=f.map(function(x){return '<div class="lc" tabindex="0" data-row="'+x.row+'"><div class="h"><b>'+esc(x.name)+'</b><span class="pill '+(STCLS[x.status]||'')+'">'+esc(x.status)+'</span></div><div class="m" dir="ltr" style="text-align:right">'+esc(x.phone)+'</div><div class="m">'+esc([x.city,x.plan].filter(Boolean).join(' · '))+'</div><div class="m">'+esc(x.date.slice(0,10))+' · '+esc(x.srcLabel)+'</div></div>';}).join('');
+  $('rows').innerHTML=f.map(function(x){return '<tr tabindex="0" data-row="'+x.row+'"><td>'+esc(x.date.slice(0,10))+'</td><td class="l"><b>'+esc(x.name)+'</b></td><td dir="ltr">'+esc(x.phone)+'</td><td>'+esc(x.city)+'</td><td class="l">'+esc(x.plan)+'</td><td class="lvl">'+esc(x.level)+'</td><td>'+esc(x.srcLabel)+'</td><td><select class="st '+(STCLS[x.status]||'')+'" data-row="'+x.row+'" aria-label="סטטוס של '+esc(x.name)+'">'+DATA.statuses.map(function(o){return '<option'+(o===x.status?' selected':'')+'>'+esc(o)+'</option>';}).join('')+'</select></td></tr>';}).join('');
+  $('cards').innerHTML=f.map(function(x){return '<div class="lc" tabindex="0" data-row="'+x.row+'"><div class="h"><b>'+esc(x.name)+'</b><select class="st '+(STCLS[x.status]||'')+'" data-row="'+x.row+'" aria-label="סטטוס של '+esc(x.name)+'">'+DATA.statuses.map(function(o){return '<option'+(o===x.status?' selected':'')+'>'+esc(o)+'</option>';}).join('')+'</select></div><div class="m" dir="ltr" style="text-align:right">'+esc(x.phone)+'</div><div class="m">'+esc([x.city,x.plan].filter(Boolean).join(' · '))+'</div><div class="m">'+esc(x.date.slice(0,10))+' · '+esc(x.srcLabel)+'</div></div>';}).join('');
   renderSources();
 }
 function renderSources(){
@@ -270,9 +276,11 @@ $('logout').addEventListener('click',function(){store('pc_key',null);location.re
 ['q','fStatus','fPartner','fSource'].forEach(function(id){$(id).addEventListener('input',function(){if(id==='fStatus')FILTER_STAT='';render();});});
 $('stats').addEventListener('click',function(e){var b=e.target.closest('.stat');if(!b)return;FILTER_STAT=b.dataset.s;$('fStatus').value='';render();});
 document.querySelector('thead').addEventListener('click',function(e){var th=e.target.closest('th[data-k]');if(!th||th.dataset.k==='phone')return;if(SORT.k===th.dataset.k)SORT.dir*=-1;else{SORT.k=th.dataset.k;SORT.dir=th.dataset.k==='date'?-1:1;}render();});
-function rowClick(e){var r=e.target.closest('[data-row]');if(r)openLead(r.dataset.row);}
-function rowKey(e){if(e.key==='Enter'){var r=e.target.closest('[data-row]');if(r)openLead(r.dataset.row);}}
-['rows','cards'].forEach(function(id){$(id).addEventListener('click',rowClick);$(id).addEventListener('keydown',rowKey);});
+function quickStatus(e){var el=e.target;if(!el.matches||!el.matches('select.st'))return;var x=DATA.items.filter(function(i){return String(i.row)===el.dataset.row;})[0];if(!x)return;var prev=x.status,val=el.value;el.className='st '+(STCLS[val]||'')+' saving';el.disabled=true;
+  call({action:'save',row:x.row,name:x.name,phone:x.phone,status:val}).then(function(r){el.disabled=false;if(r.ok){x.status=val;render();}else{el.value=prev;el.className='st '+(STCLS[prev]||'');if(r.error==='changed'){alert('השורה השתנתה בגיליון. מרעננים את הרשימה.');refresh();}else alert('הסטטוס לא נשמר. אפשר לנסות שוב.');}}).catch(function(){el.disabled=false;el.value=prev;el.className='st '+(STCLS[prev]||'');alert('אין חיבור לשרת. הסטטוס לא נשמר.');});}
+function rowClick(e){if(e.target.closest('select.st'))return;var r=e.target.closest('[data-row]');if(r)openLead(r.dataset.row);}
+function rowKey(e){if(e.target.closest('select.st'))return;if(e.key==='Enter'){var r=e.target.closest('[data-row]');if(r)openLead(r.dataset.row);}}
+['rows','cards'].forEach(function(id){$(id).addEventListener('change',quickStatus);$(id).addEventListener('click',rowClick);$(id).addEventListener('keydown',rowKey);});
 $('dClose').addEventListener('click',function(){$('dlg').close();});
 $('eSave').addEventListener('click',save);
 document.querySelectorAll('.tabs button').forEach(function(t){t.addEventListener('click',function(){document.querySelectorAll('.tabs button').forEach(function(o){o.setAttribute('aria-selected',o===t?'true':'false');});$('tab-leads').hidden=t.dataset.tab!=='leads';$('tab-sources').hidden=t.dataset.tab!=='sources';});});
