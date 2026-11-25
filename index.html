@@ -148,9 +148,11 @@ var Q=[
 // עליית גג: שאלון קצר. בנייה ותוספות: ישר לפרטים, הסינון בשיחה
 var QA=[
  {k:'region',q:'באיזה אזור הבית?',o:REGIONS.map(function(r){return r.t;})},
- {k:'permit',q:'איפה אתם עם היתר הבנייה?',o:['יש היתר','בתהליך','עוד לא התחלנו','לא יודעים אם צריך']},
- {k:'when',q:'מתי תרצו להתחיל?',o:['בשלושת החודשים הקרובים','בעוד 3 עד 6 חודשים','בעוד חצי שנה עד שנה','יותר משנה']},
- {k:'budget',q:'מה התקציב המשוער?',o:['עד 400,000 ש"ח','מעל 400,000 ש"ח','עוד לא יודעים']}
+ {k:'tiles',q:'יש לכם גג רעפים?',o:['כן','לא','לא בטוחים']},
+ {k:'rabitz',q:'התקרה שלכם היא תקרת רביץ?',o:['כן','לא','לא יודעים']},
+ {k:'forwho',q:'למי היחידה מיועדת?',o:['לנו','לילדים','להורים','להשכרה','עוד לא החלטנו']},
+ {k:'levels',q:'מפלס אחד או שני מפלסים?',o:['מפלס אחד','2 מפלסים','לא יודעים']},
+ {k:'size',q:'כמה מטר יש שם בערך?',o:['עד 40 מ"ר','40 עד 70 מ"ר','מעל 70 מ"ר','לא יודעים']}
 ];
 var mode=(params.get('t')||'').toLowerCase();
 var A={}, i=0, started=false;
@@ -210,7 +212,7 @@ form.addEventListener('submit',function(e){
   var c=classify();
   var btn=document.getElementById('sendBtn'); btn.disabled=true; btn.textContent='שולח...';
   send({type:'lead',name:name,phone:phone,city:city,notes:document.getElementById('f-notes').value.trim(),website:document.getElementById('f-web').value,
-        plan:A.plan,region:A.region,permit:A.permit,budget:A.budget,when:A.when,tab:c.tab,reason:c.reason})
+        plan:A.plan,region:A.region,property:(A.plan==='עליית גג'?['רעפים: '+(A.tiles||''),'רביץ: '+(A.rabitz||''),'יחידה ל: '+(A.forwho||''),'מפלסים: '+(A.levels||''),'שטח: '+(A.size||'')].join(' · '):''),tab:c.tab,reason:c.reason})
   .then(function(res){
     if(!res||res.ok!==true) throw new Error('bad');
     form.hidden=true; count.textContent=''; bar.style.width='100%'; done.hidden=false;
