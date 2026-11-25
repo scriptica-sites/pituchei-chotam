@@ -114,7 +114,7 @@ footer a{white-space:nowrap}
 
 <script>
 (function(){
-var ENDPOINT='PASTE_EXEC_URL_HERE';
+var ENDPOINT='https://script.google.com/macros/s/AKfycbyNUXPd1BSIjdQEL42h5gQDsNkdEEv_D5m2NzTy1FWrrwUiMT7t7I2DOorCZkyt8O8FnA/exec';
 var src=(new URLSearchParams(location.search).get('src')||'').replace(/[^\w\-]/g,'').slice(0,40);
 function send(p){p.src=src||'direct';p.page='partners';
   if(ENDPOINT.indexOf('http')!==0) return Promise.resolve({ok:true,local:true});
