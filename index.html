@@ -73,7 +73,7 @@ footer a{white-space:nowrap}
 </div>
 <div class="hero">
 <h1 id="heroT">עליית גג, תוספת בנייה או בית פרטי. קבלן אחד מהיסודות ועד הפיתוח.</h1>
-<p>ענו על כמה שאלות קצרות, ונחזור אליכם לתאם פגישת ייעוץ. בפגישה תקבלו מחיר מוערך לפרויקט שלכם.</p>
+<p>השאירו פרטים ונחזור אליכם לתאם פגישת ייעוץ. בפגישה תקבלו מחיר מוערך לפרויקט שלכם.</p>
 <button class="btn" type="button" id="startBtn">מתחילים, זה לוקח דקה</button>
 </div>
 </div>
@@ -84,9 +84,10 @@ footer a{white-space:nowrap}
 <section class="card" id="quiz" aria-live="polite">
 <div class="progress" aria-hidden="true"><i id="bar"></i></div>
 <div class="step-count" id="count"></div>
-<div id="qbox"></div>
+<div id="qintro" class="done" hidden><p><b id="qintroT">קיבלנו את הפרטים, נחזור אליכם.</b> כדי שנגיע לשיחה מוכנים, עוד כמה שאלות קצרות:</p></div>
+<div id="qbox" hidden></div>
 
-<form id="details" hidden novalidate>
+<form id="details" novalidate>
 <div class="q"><h2>לאן לחזור אליכם?</h2></div>
 <div class="field"><label for="f-name">שם מלא</label><input id="f-name" name="name" autocomplete="name" required></div>
 <div class="field"><label for="f-phone">טלפון נייד</label><input id="f-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" placeholder="05X-XXXXXXX" required></div>
@@ -95,7 +96,7 @@ footer a{white-space:nowrap}
 <div class="hp" aria-hidden="true"><label for="f-web">אתר</label><input id="f-web" name="website" tabindex="-1" autocomplete="off"></div>
 <label class="check"><input type="checkbox" id="f-consent" required><span>אני מאשר/ת שפיתוחי חותם יחזרו אליי בטלפון או בוואטסאפ לגבי הפנייה. <a href="privacy.html" target="_blank" rel="noopener">מדיניות פרטיות</a></span></label>
 <div class="err" id="err" role="alert"></div>
-<div class="nav"><button class="btn ghost" type="button" id="backFromDetails">חזרה</button><button class="btn" type="submit" id="sendBtn">שליחה</button></div>
+<div class="nav"><button class="btn" type="submit" id="sendBtn">שליחה</button></div>
 </form>
 
 <div class="done" id="done" hidden tabindex="-1">
@@ -152,20 +153,19 @@ var QA=[
  {k:'rabitz',q:'התקרה שלכם היא תקרת רביץ?',o:['כן','לא','לא יודעים']},
  {k:'forwho',q:'למי היחידה מיועדת?',o:['לנו','לילדים','להורים','להשכרה','עוד לא החלטנו']},
  {k:'levels',q:'מפלס אחד או שני מפלסים?',o:['מפלס אחד','2 מפלסים','לא יודעים']},
- {k:'size',q:'כמה מטר יש שם בערך?',o:['עד 40 מ"ר','40 עד 70 מ"ר','מעל 70 מ"ר','לא יודעים']}
+ {k:'size',q:'כמה מטר יש שם בערך?',o:['עד 40 מ"ר','40 עד 70 מ"ר','מעל 70 מ"ר','לא יודעים']},
+ {k:'budget',q:'מה התקציב המשוער?',o:['עד 400,000 ש"ח','מעל 400,000 ש"ח','עוד לא יודעים']}
 ];
 var mode=(params.get('t')||'').toLowerCase();
-var A={}, i=0, started=false;
+var A={}, i=0, started=false, ID='';
 if(mode==='gag'){ A.plan='עליית גג'; Q=QA.slice(); document.getElementById('heroT').textContent='עליית גג: עוד קומה שלמה מעל הבית, בלי לעבור דירה.'; }
-var total=Q.length+1;
 var qbox=document.getElementById('qbox'), bar=document.getElementById('bar'), count=document.getElementById('count');
-var form=document.getElementById('details'), done=document.getElementById('done');
+var form=document.getElementById('details'), done=document.getElementById('done'), intro=document.getElementById('qintro');
 
 function render(){
-  form.hidden=true; qbox.hidden=false;
   var q=Q[i];
-  count.textContent='שאלה '+(i+1)+' מתוך '+total;
-  bar.style.width=Math.round(i/total*100)+'%';
+  count.textContent='שאלה '+(i+1)+' מתוך '+Q.length;
+  bar.style.width=Math.round((i+1)/(Q.length+1)*100)+'%';
   var h='<div class="q"><h2 id="qh" tabindex="-1">'+q.q+'</h2><div class="opts" role="group" aria-labelledby="qh">';
   q.o.forEach(function(o,n){h+='<button type="button" class="opt" data-n="'+n+'" aria-pressed="'+(A[q.k]===o?'true':'false')+'">'+o+'</button>';});
   h+='</div></div>';
@@ -175,28 +175,31 @@ function render(){
   var bb=document.getElementById('backBtn'); if(bb) bb.addEventListener('click',function(){i--;render();});
   document.getElementById('qh').focus({preventScroll:true});
 }
+function classify(){
+  if(A.plan!=='עליית גג') return A.plan?'בנייה: לסינון בשיחה':'שאלון לא הושלם';
+  var r=REGIONS.filter(function(x){return x.t===A.region;})[0];
+  if(!r) return 'עליית גג, שאלון לא הושלם';
+  return 'רלוונטיות '+(r.attic==='ok'?'גבוהה':(r.attic==='check'?'בינונית':'נמוכה'))+' (אזור)';
+}
+function update(){
+  if(!ID) return;
+  send({type:'update',id:ID,plan:A.plan||'',region:A.region||'',
+    property:(A.plan==='עליית גג'?[['רעפים',A.tiles],['רביץ',A.rabitz],['יחידה ל',A.forwho],['מפלסים',A.levels],['שטח',A.size]].filter(function(x){return x[1];}).map(function(x){return x[0]+': '+x[1];}).join(' · '):''),
+    budget:A.budget||'',reason:classify()}).catch(function(){});
+}
+function finish(){
+  intro.hidden=true; qbox.hidden=true; count.textContent=''; bar.style.width='100%'; done.hidden=false; done.focus({preventScroll:true});
+}
 function pick(e){
   var q=Q[i], n=+e.currentTarget.dataset.n;
   A[q.k]=q.o[n];
-  if(q.k==='plan'){ Q=Q.slice(0,1).concat(A.plan==='עליית גג'?QA:[]); total=Q.length+1; }
+  if(q.k==='plan'){ Q=Q.slice(0,1).concat(A.plan==='עליית גג'?QA:[]); }
   qbox.querySelectorAll('.opt').forEach(function(b){b.setAttribute('aria-pressed',b===e.currentTarget?'true':'false');});
-  if(!started){started=true;send({type:'event',event:'start'}).catch(function(){});}
-  setTimeout(function(){ i++; if(i<Q.length) render(); else showDetails(); },380);
+  update();
+  setTimeout(function(){ i++; if(i<Q.length) render(); else finish(); },380);
 }
-function showDetails(){
-  qbox.hidden=true; form.hidden=false;
-  count.textContent='שלב אחרון'; bar.style.width=Math.round(Q.length/total*100)+'%';
-  document.getElementById('f-name').focus({preventScroll:true});
-}
-document.getElementById('backFromDetails').addEventListener('click',function(){i=Q.length-1;if(i<0){i=0;}render();});
-document.getElementById('startBtn').addEventListener('click',function(){document.getElementById('quiz').scrollIntoView({behavior:'smooth'});var h=document.getElementById('qh');if(h)h.focus({preventScroll:true});});
-
-function classify(){
-  if(A.plan!=='עליית גג') return {tab:'check',reason:'בנייה: לסינון בשיחה'};
-  var r=REGIONS.filter(function(x){return x.t===A.region;})[0]||{};
-  var lvl=r.attic==='ok'?'גבוהה':(r.attic==='check'?'בינונית':'נמוכה');
-  return {tab:'check',reason:'רלוונטיות '+lvl+' (אזור)'};
-}
+document.getElementById('startBtn').addEventListener('click',function(){document.getElementById('quiz').scrollIntoView({behavior:'smooth'});document.getElementById('f-name').focus({preventScroll:true});});
+document.getElementById('f-name').addEventListener('focus',function(){ if(!started){started=true;send({type:'event',event:'start'}).catch(function(){});} });
 function normPhone(p){var d=(p||'').replace(/\D/g,'');if(d.indexOf('972')===0)d='0'+d.slice(3);return /^05\d{8}$/.test(d)?d.slice(0,3)+'-'+d.slice(3):'';}
 
 form.addEventListener('submit',function(e){
@@ -209,20 +212,21 @@ form.addEventListener('submit',function(e){
   if(!phone){err.textContent='נא למלא מספר נייד תקין, 10 ספרות שמתחילות ב-05.';return;}
   if(!city){err.textContent='נא למלא יישוב.';return;}
   if(!document.getElementById('f-consent').checked){err.textContent='כדי שנחזור אליכם צריך לסמן את האישור.';return;}
-  var c=classify();
   var btn=document.getElementById('sendBtn'); btn.disabled=true; btn.textContent='שולח...';
-  send({type:'lead',name:name,phone:phone,city:city,notes:document.getElementById('f-notes').value.trim(),website:document.getElementById('f-web').value,
-        plan:A.plan,region:A.region,property:(A.plan==='עליית גג'?['רעפים: '+(A.tiles||''),'רביץ: '+(A.rabitz||''),'יחידה ל: '+(A.forwho||''),'מפלסים: '+(A.levels||''),'שטח: '+(A.size||'')].join(' · '):''),tab:c.tab,reason:c.reason})
+  var id=Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+  send({type:'lead',id:id,name:name,phone:phone,city:city,notes:document.getElementById('f-notes').value.trim(),website:document.getElementById('f-web').value,
+        plan:A.plan||'',tab:'check',reason:classify()})
   .then(function(res){
     if(!res||res.ok!==true) throw new Error('bad');
-    form.hidden=true; count.textContent=''; bar.style.width='100%'; done.hidden=false;
+    ID=id; form.hidden=true;
     var first=name.split(' ')[0];
     document.getElementById('doneTitle').textContent='תודה '+first+', קיבלנו.';
-    done.focus({preventScroll:true});
+    document.getElementById('qintroT').textContent='תודה '+first+', קיבלנו את הפרטים ונחזור אליכם.';
+    intro.hidden=false; qbox.hidden=false; i=0; render();
   })
   .catch(function(){err.textContent='משהו השתבש בשליחה. אפשר לנסות שוב, או להתקשר לגואל: 052-5143632.';btn.disabled=false;btn.textContent='שליחה';});
 });
-render();
+count.textContent='שלב 1: פרטים ליצירת קשר'; bar.style.width=Math.round(100/(Q.length+1))+'%';
 })();
 </script>
 </body>
