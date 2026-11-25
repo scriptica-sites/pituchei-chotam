@@ -72,7 +72,7 @@ footer a{white-space:nowrap}
 <a class="brand" href="./" id="brand"><img src="pituchei-chotam-logo-light.svg" alt="פיתוחי חותם" style="height:64px;width:auto;display:block"></a>
 </div>
 <div class="hero">
-<h1>עליית גג, תוספת בנייה או בית פרטי. קבלן אחד מהיסודות ועד הפיתוח.</h1>
+<h1 id="heroT">עליית גג, תוספת בנייה או בית פרטי. קבלן אחד מהיסודות ועד הפיתוח.</h1>
 <p>ענו על כמה שאלות קצרות, ונחזור אליכם לתאם פגישת ייעוץ. בפגישה תקבלו מחיר מוערך לפרויקט שלכם.</p>
 <button class="btn" type="button" id="startBtn">מתחילים, זה לוקח דקה</button>
 </div>
@@ -143,13 +143,19 @@ var REGIONS=[
  {v:'מחוץ',t:'דרומית למצפה רמון או צפונית לזכרון יעקב',build:'out',attic:'out'}
 ];
 var Q=[
- {k:'plan',q:'מה אתם מתכננים?',o:['עליית גג','בית פרטי חדש','תוספת בנייה לבית קיים','עוד לא בטוחים']},
- {k:'region',q:'באיזה אזור הנכס?',o:REGIONS.map(function(r){return r.t;})},
- {k:'permit',q:'איפה אתם עם היתר הבנייה?',o:['יש היתר','בתהליך','עוד לא התחלנו','לא יודעים אם צריך']},
- {k:'budget',q:'מה התקציב המשוער לפרויקט?',o:['עד 400,000 ש"ח','400,000 עד 700,000 ש"ח','700,000 עד 1,200,000 ש"ח','מעל 1,200,000 ש"ח','עוד לא יודעים']},
- {k:'when',q:'מתי תרצו להתחיל?',o:['בשלושת החודשים הקרובים','בעוד 3 עד 6 חודשים','בעוד חצי שנה עד שנה','יותר משנה']}
+ {k:'plan',q:'מה אתם מתכננים?',o:['עליית גג','בית פרטי חדש','תוספת בנייה לבית קיים','עוד לא בטוחים']}
 ];
-var A={}, i=0, started=false, total=Q.length+1;
+// עליית גג: שאלון קצר. בנייה ותוספות: ישר לפרטים, הסינון בשיחה
+var QA=[
+ {k:'region',q:'באיזה אזור הבית?',o:REGIONS.map(function(r){return r.t;})},
+ {k:'permit',q:'איפה אתם עם היתר הבנייה?',o:['יש היתר','בתהליך','עוד לא התחלנו','לא יודעים אם צריך']},
+ {k:'when',q:'מתי תרצו להתחיל?',o:['בשלושת החודשים הקרובים','בעוד 3 עד 6 חודשים','בעוד חצי שנה עד שנה','יותר משנה']},
+ {k:'budget',q:'מה התקציב המשוער?',o:['עד 400,000 ש"ח','מעל 400,000 ש"ח','עוד לא יודעים']}
+];
+var mode=(params.get('t')||'').toLowerCase();
+var A={}, i=0, started=false;
+if(mode==='gag'){ A.plan='עליית גג'; Q=QA.slice(); document.getElementById('heroT').textContent='עליית גג: עוד קומה שלמה מעל הבית, בלי לעבור דירה.'; }
+var total=Q.length+1;
 var qbox=document.getElementById('qbox'), bar=document.getElementById('bar'), count=document.getElementById('count');
 var form=document.getElementById('details'), done=document.getElementById('done');
 
@@ -170,6 +176,7 @@ function render(){
 function pick(e){
   var q=Q[i], n=+e.currentTarget.dataset.n;
   A[q.k]=q.o[n];
+  if(q.k==='plan'){ Q=Q.slice(0,1).concat(A.plan==='עליית גג'?QA:[]); total=Q.length+1; }
   qbox.querySelectorAll('.opt').forEach(function(b){b.setAttribute('aria-pressed',b===e.currentTarget?'true':'false');});
   if(!started){started=true;send({type:'event',event:'start'}).catch(function(){});}
   setTimeout(function(){ i++; if(i<Q.length) render(); else showDetails(); },380);
@@ -179,20 +186,14 @@ function showDetails(){
   count.textContent='שלב אחרון'; bar.style.width=Math.round(Q.length/total*100)+'%';
   document.getElementById('f-name').focus({preventScroll:true});
 }
-document.getElementById('backFromDetails').addEventListener('click',function(){i=Q.length-1;render();});
+document.getElementById('backFromDetails').addEventListener('click',function(){i=Q.length-1;if(i<0){i=0;}render();});
 document.getElementById('startBtn').addEventListener('click',function(){document.getElementById('quiz').scrollIntoView({behavior:'smooth'});var h=document.getElementById('qh');if(h)h.focus({preventScroll:true});});
 
 function classify(){
+  if(A.plan!=='עליית גג') return {tab:'check',reason:'בנייה: לסינון בשיחה'};
   var r=REGIONS.filter(function(x){return x.t===A.region;})[0]||{};
-  var isAttic=A.plan==='עליית גג';
-  var reg=isAttic?r.attic:r.build;
-  if(A.plan==='עוד לא בטוחים') reg=(r.build==='out'&&r.attic==='out')?'out':(r.build==='check'?'check':'ok');
-  if(reg==='out') return {tab:'out',reason:'מחוץ לאזור הפעילות'};
-  var low=(A.budget==='עד 400,000 ש"ח'||A.budget==='400,000 עד 700,000 ש"ח');
-  if(!isAttic && A.plan!=='עוד לא בטוחים' && low) return {tab:'no',reason:'תקציב מתחת ל-700,000 בבנייה או תוספת'};
-  if(reg==='check') return {tab:'check',reason:'אזור לבדיקה'};
-  if(A.plan==='עוד לא בטוחים' && low) return {tab:'check',reason:'לא בטוחים מה מתכננים, תקציב נמוך'};
-  return {tab:'fit',reason:''};
+  var lvl=r.attic==='ok'?'גבוהה':(r.attic==='check'?'בינונית':'נמוכה');
+  return {tab:'check',reason:'רלוונטיות '+lvl+' (אזור)'};
 }
 function normPhone(p){var d=(p||'').replace(/\D/g,'');if(d.indexOf('972')===0)d='0'+d.slice(3);return /^05\d{8}$/.test(d)?d.slice(0,3)+'-'+d.slice(3):'';}
 
@@ -209,13 +210,12 @@ form.addEventListener('submit',function(e){
   var c=classify();
   var btn=document.getElementById('sendBtn'); btn.disabled=true; btn.textContent='שולח...';
   send({type:'lead',name:name,phone:phone,city:city,notes:document.getElementById('f-notes').value.trim(),website:document.getElementById('f-web').value,
-        plan:A.plan,region:A.region,property:A.property,permit:A.permit,budget:A.budget,when:A.when,architect:A.architect,tab:c.tab,reason:c.reason})
+        plan:A.plan,region:A.region,permit:A.permit,budget:A.budget,when:A.when,tab:c.tab,reason:c.reason})
   .then(function(res){
     if(!res||res.ok!==true) throw new Error('bad');
     form.hidden=true; count.textContent=''; bar.style.width='100%'; done.hidden=false;
     var first=name.split(' ')[0];
     document.getElementById('doneTitle').textContent='תודה '+first+', קיבלנו.';
-    if(c.tab==='out') document.getElementById('doneText').textContent='כרגע אנחנו לא עובדים באזור הזה. שמרנו את הפרטים, ואם זה ישתנה נחזור אליכם.';
     done.focus({preventScroll:true});
   })
   .catch(function(){err.textContent='משהו השתבש בשליחה. אפשר לנסות שוב, או להתקשר לגואל: 052-5143632.';btn.disabled=false;btn.textContent='שליחה';});
