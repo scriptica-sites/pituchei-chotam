@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>פיתוחי חותם | שיתוף פעולה לאנשי מקצוע</title>
+<meta name="description" content="שיתוף פעולה עם פיתוחי חותם לאדריכלים, מהנדסים, מפקחים ויועצי משכנתאות. בתים פרטיים, תוספות בנייה ועליות גג בבנייה מתקדמת.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1F1D1A;--ink2:#3D3A34;--muted:#6B655A;--cream:#FBF8F1;--sand:#F2ECDD;--line:#E6DFCF;--gold:#BF8F00;--gold-dk:#7A5B00;--white:#fff;--err:#A33A3A}
+*{box-sizing:border-box}
+html{scrollbar-gutter:stable;overflow-y:scroll}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:Heebo,Arial,sans-serif;font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--gold-dk)}
+.wrap{max-width:760px;margin:0 auto;padding:0 20px}
+header.top{background:var(--ink);color:var(--cream);padding-bottom:36px}
+.bar{padding:16px 0}
+.brand{font-weight:800;font-size:24px;color:var(--gold);text-decoration:none}
+.brand small{display:block;font-size:12px;font-weight:500;color:#D9D2C3}
+h1{margin:20px 0 12px;font-size:32px;line-height:1.25;font-weight:800}
+.lead{margin:0;color:#E8E2D4;font-size:18px}
+main{padding:32px 0 56px}
+h2{margin:0 0 14px;font-size:23px;font-weight:800}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:34px}
+.grid div{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:18px}
+.grid i{display:block;width:34px;height:4px;background:var(--gold);border-radius:2px;margin-bottom:10px}
+.grid b{display:block;font-size:17px;margin-bottom:4px}
+.grid span{font-size:15px;color:var(--ink2)}
+ol.steps{margin:0 0 34px;padding:0;list-style:none;counter-reset:s;display:grid;gap:12px}
+ol.steps li{counter-increment:s;display:flex;gap:14px;align-items:flex-start;background:var(--white);border:1px solid var(--line);border-radius:12px;padding:16px}
+ol.steps li::before{content:counter(s);flex:0 0 34px;height:34px;border-radius:50%;background:var(--ink);color:var(--gold);font-weight:800;display:flex;align-items:center;justify-content:center}
+.mine{background:var(--sand);border-radius:12px;padding:18px;margin-bottom:34px}
+.mine code{display:block;direction:ltr;text-align:left;background:var(--white);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:15px;word-break:break-all;margin:8px 0 12px}
+.card{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:24px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field label{font-weight:700;font-size:16px}
+.field input,.field select,.field textarea{min-height:50px;padding:10px 14px;border:1.5px solid var(--line);border-radius:10px;font:inherit;font-size:17px;background:var(--white);color:var(--ink)}
+.field textarea{min-height:90px;resize:vertical}
+.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:15px;color:var(--ink2);margin:6px 0 16px}
+.check input{width:22px;height:22px;margin-top:2px;flex:0 0 auto}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 28px;border:0;border-radius:10px;background:var(--gold);color:var(--ink);font:inherit;font-weight:800;font-size:18px;cursor:pointer}
+.btn:hover{background:#D4A72C}
+.btn.small{min-height:44px;font-size:16px;padding:0 18px}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--gold-dk);outline-offset:2px}
+.err{color:var(--err);font-size:15px;min-height:22px}
+.hp{position:absolute;clip-path:inset(50%);width:1px;height:1px;overflow:hidden;white-space:nowrap}
+.note{font-size:15px;color:var(--muted);margin-top:8px}
+footer{background:var(--ink);color:#D9D2C3;font-size:14px;padding:22px 0}
+footer a{color:var(--gold)}
+[hidden]{display:none!important}
+[tabindex="-1"]:focus{outline:none}
+footer a{white-space:nowrap}
+@media (max-width:560px){h1{font-size:27px}.grid,.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+<div class="bar"><a class="brand" href="../"><img src="../pituchei-chotam-logo-light.svg" alt="פיתוחי חותם" style="height:64px;width:auto;display:block"></a></div>
+<h1>קבלן אחד שסוגר לך את כל הפינות בביצוע, מהיסודות ועד הפיתוח</h1>
+<p class="lead">בתים פרטיים, תוספות בנייה ועליות גג בשיטת בנייה מתקדמת. גגות ופיתוח חוץ אצלנו בבית.</p>
+</div></header>
+
+<main class="wrap">
+<section class="mine" id="mine" hidden>
+<h2>הקישור האישי שלך ללקוחות</h2>
+<div>כל לקוח שמגיע דרך הקישור הזה נרשם אצלנו על שמך.</div>
+<code id="myLink"></code>
+<button class="btn small" type="button" id="copyBtn">העתקת הקישור</button>
+<span id="copied" class="note" role="status"></span>
+</section>
+
+<h2>למה לעבוד איתנו</h2>
+<div class="grid">
+<div><i></i><b>20 שנה של ביצוע</b><span>בתים פרטיים ותוספות בנייה, ממצפה רמון ועד זכרון יעקב.</span></div>
+<div><i></i><b>כל העבודות אצלנו</b><span>שלד, מעטפת, גמר, פיתוח חוץ וגם הגגות, בלי קבלני משנה לתאם.</span></div>
+<div><i></i><b>הבנה הנדסית ואדריכלית</b><span>מהנדס מטעם החברה בכל פרויקט, וביצוע לפי התוכנית האדריכלית.</span></div>
+<div><i></i><b>הלקוח שלך בידיים טובות</b><span>פיקוח צמוד בשטח של גואל ויששכר, מהיציקה ועד הגמר.</span></div>
+</div>
+
+<h2>איך זה עובד</h2>
+<ol class="steps">
+<li><div><b>שיחת היכרות קצרה.</b> נכיר, נסביר את שיטת הבנייה ונסגור את תנאי שיתוף הפעולה.</div></li>
+<li><div><b>פגישה עם גואל.</b> בימים ראשון עד שלישי, בכל שעה, גם בערב.</div></li>
+<li><div><b>קישור אישי ללקוחות שלך.</b> כל פנייה שמגיעה דרכו מסומנת על שמך, ואנחנו מעדכנים אותך.</div></li>
+</ol>
+
+<section class="card" aria-labelledby="formh">
+<h2 id="formh">נשמח להכיר</h2>
+<form id="pform" novalidate>
+<div class="row">
+<div class="field"><label for="p-name">שם מלא</label><input id="p-name" autocomplete="name" required></div>
+<div class="field"><label for="p-role">תחום</label>
+<select id="p-role" required><option value="">בחירה</option><option>אדריכל/ית</option><option>מהנדס/ת</option><option>מפקח/ת בנייה או ניהול פרויקטים</option><option>מעצב/ת פנים</option><option>יועץ/ת משכנתאות</option><option>אחר</option></select></div>
+</div>
+<div class="row">
+<div class="field"><label for="p-phone">טלפון נייד</label><input id="p-phone" type="tel" inputmode="tel" dir="ltr" autocomplete="tel" placeholder="05X-XXXXXXX" required></div>
+<div class="field"><label for="p-city">עיר</label><input id="p-city" autocomplete="address-level2"></div>
+</div>
+<div class="field"><label for="p-email">מייל (לא חובה)</label><input id="p-email" type="email" dir="ltr" autocomplete="email"></div>
+<div class="field"><label for="p-notes">משהו נוסף? (לא חובה)</label><textarea id="p-notes"></textarea></div>
+<div class="hp" aria-hidden="true"><label for="p-web">אתר</label><input id="p-web" tabindex="-1" autocomplete="off"></div>
+<label class="check"><input type="checkbox" id="p-consent" required><span>אני מאשר/ת שפיתוחי חותם יחזרו אליי בטלפון או בוואטסאפ. <a href="../privacy.html" target="_blank" rel="noopener">מדיניות פרטיות</a></span></label>
+<div class="err" id="perr" role="alert"></div>
+<button class="btn" type="submit" id="psend">שליחה</button>
+</form>
+<div id="pdone" hidden tabindex="-1"><h2>תודה, קיבלנו.</h2><p>נחזור אליך בימים הקרובים לתאם שיחת היכרות.</p></div>
+</section>
+</main>
+
+<footer><div class="wrap">פיתוחי חותם בע"מ · גואל <a href="tel:0525143632" dir="ltr">052-5143632</a> · <a href="mailto:office@p-hotam.co.il" dir="ltr">office@p-hotam.co.il</a> · <a href="../privacy.html">מדיניות פרטיות</a></div></footer>
+
+<script>
+(function(){
+var ENDPOINT='PASTE_EXEC_URL_HERE';
+var src=(new URLSearchParams(location.search).get('src')||'').replace(/[^\w\-]/g,'').slice(0,40);
+function send(p){p.src=src||'direct';p.page='partners';
+  if(ENDPOINT.indexOf('http')!==0) return Promise.resolve({ok:true,local:true});
+  return fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(p)}).then(function(r){return r.json();});}
+send({type:'event',event:'visit'}).catch(function(){});
+if(src){
+  var base=location.href.split('?')[0].replace(/shutafim\/?(index\.html)?$/,'');
+  var link=base+'?src='+encodeURIComponent(src);
+  document.getElementById('myLink').textContent=link;
+  document.getElementById('mine').hidden=false;
+  document.getElementById('copyBtn').addEventListener('click',function(){
+    var done=function(){document.getElementById('copied').textContent=' הועתק';};
+    if(navigator.clipboard) navigator.clipboard.writeText(link).then(done,function(){}); else done();
+  });
+}
+function normPhone(p){var d=(p||'').replace(/\D/g,'');if(d.indexOf('972')===0)d='0'+d.slice(3);return /^05\d{8}$/.test(d)?d.slice(0,3)+'-'+d.slice(3):'';}
+document.getElementById('pform').addEventListener('submit',function(e){
+  e.preventDefault();
+  var err=document.getElementById('perr');err.textContent='';
+  var name=document.getElementById('p-name').value.trim(), role=document.getElementById('p-role').value, phone=normPhone(document.getElementById('p-phone').value);
+  if(!name){err.textContent='נא למלא שם.';return;}
+  if(!role){err.textContent='נא לבחור תחום.';return;}
+  if(!phone){err.textContent='נא למלא מספר נייד תקין, 10 ספרות שמתחילות ב-05.';return;}
+  if(!document.getElementById('p-consent').checked){err.textContent='כדי שנחזור אליך צריך לסמן את האישור.';return;}
+  var b=document.getElementById('psend');b.disabled=true;b.textContent='שולח...';
+  send({type:'partner',name:name,role:role,phone:phone,city:document.getElementById('p-city').value.trim(),email:document.getElementById('p-email').value.trim(),notes:document.getElementById('p-notes').value.trim(),website:document.getElementById('p-web').value})
+  .then(function(r){if(!r||r.ok!==true)throw new Error();document.getElementById('pform').hidden=true;var d=document.getElementById('pdone');d.hidden=false;d.focus({preventScroll:true});})
+  .catch(function(){err.textContent='משהו השתבש בשליחה. אפשר לנסות שוב, או להתקשר לגואל: 052-5143632.';b.disabled=false;b.textContent='שליחה';});
+});
+})();
+</script>
+</body>
+</html>
