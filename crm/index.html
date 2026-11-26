@@ -113,6 +113,35 @@ dialog::backdrop{background:rgba(31,29,26,.45)}
 .src td,.src th{text-align:center}
 .src td.l{text-align:right}
 .note{font-size:14px;color:var(--muted);margin:10px 0 30px}
+/* calendar */
+.calbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 14px}
+.calbar .wk{font-weight:700;font-size:17px;min-width:150px;text-align:center}
+.calbar .sp{flex:1}
+.calhint{font-size:14px;color:var(--muted);margin:0 0 12px}
+.cal{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:30px}
+.day{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;min-height:200px}
+.day.mt{border-color:var(--gold)}
+.day.today{box-shadow:0 0 0 2px var(--gold-dk) inset}
+.day.past{opacity:.6}
+.dhd{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:6px}
+.dhd b{font-size:15px}.dhd span{font-size:12px;color:var(--muted)}
+.dcities{font-size:12px;color:var(--gold-dk);min-height:16px}
+.ev{border-radius:10px;padding:8px 10px;background:#F3EEE2;border-right:4px solid var(--gold);font-size:14px;display:flex;flex-direction:column;gap:2px}
+.ev .t{font-weight:700;font-size:13px;color:var(--gold-dk)}
+.ev .n{font-weight:600}
+.ev .l{font-size:13px;color:var(--ink2)}
+.ev .a{display:flex;gap:10px;margin-top:4px;flex-wrap:wrap}
+.ev .a a,.ev .a button{font-size:13px;color:var(--ink);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline}
+.ev .a button.cx{color:var(--err)}
+.free{border:1.5px dashed var(--line);border-radius:10px;padding:8px 10px;background:var(--cream);color:var(--ink2);font-size:14px;cursor:pointer;text-align:right;min-height:44px;display:flex;justify-content:space-between;align-items:center}
+.free:hover{border-color:var(--gold);color:var(--ink)}
+.free b{font-weight:700}
+.other{font-size:13px;background:none;border:0;color:var(--muted);cursor:pointer;text-decoration:underline;padding:4px 0;text-align:right}
+.calload{opacity:.45;pointer-events:none}
+#bk .ed .row2{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+#bk .warn{font-size:14px;color:var(--err);margin-top:10px;min-height:18px}
+#bk .hint{font-size:13px;color:var(--muted);margin-top:4px}
+@media (max-width:820px){.cal{grid-template-columns:1fr}.day{min-height:0}#bk .ed .row2{grid-template-columns:1fr 1fr}}
 @media (max-width:820px){.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.filters{grid-template-columns:1fr 1fr}.filters input{grid-column:1/-1}.tbl.leads{display:none}.cards{display:grid}.kv{grid-template-columns:100px 1fr}header.top .upd{display:none}}
 </style>
 </head>
@@ -143,6 +172,7 @@ dialog::backdrop{background:rgba(31,29,26,.45)}
 <main class="wrap">
 <div class="tabs" role="tablist">
 <button role="tab" aria-selected="true" data-tab="leads">לידים</button>
+<button role="tab" aria-selected="false" data-tab="cal">יומן פגישות</button>
 <button role="tab" aria-selected="false" data-tab="sources">מקורות ושותפים</button>
 </div>
 
@@ -172,6 +202,20 @@ dialog::backdrop{background:rgba(31,29,26,.45)}
 <div class="cards" id="cards"></div>
 </section>
 
+<section id="tab-cal" hidden>
+<div class="calbar">
+<button class="btn ghost" type="button" id="wkPrev" aria-label="שבוע קודם">→ שבוע קודם</button>
+<span class="wk" id="wkLbl"></span>
+<button class="btn ghost" type="button" id="wkNext" aria-label="שבוע הבא">שבוע הבא ←</button>
+<button class="btn ghost" type="button" id="wkToday">השבוע</button>
+<span class="sp"></span>
+<button class="btn" type="button" id="bkNew">+ פגישה חדשה</button>
+</div>
+<p class="calhint">ימי פגישות: ראשון עד שלישי, מ-11:00, שעתיים בין פגישות, 2-3 ביום. מרכזים באותו יום לקוחות מאותו אזור. כל פגישה שנקבעת כאן נכנסת ליומן Google המשותף ושולחת זימון לכפיר ולמשרד.</p>
+<div class="listmsg" id="calMsg" style="display:none"><span class="spin"></span>טוען את היומן...</div>
+<div class="cal" id="cal"></div>
+</section>
+
 <section id="tab-sources" hidden>
 <div class="tbl src"><table>
 <thead><tr><th>מקור</th><th>כניסות לאתר</th><th>התחילו למלא</th><th>השאירו פרטים</th><th>לידים בגיליון</th><th>נקבעה פגישה ומעלה</th><th>נסגרו</th></tr></thead>
@@ -194,6 +238,25 @@ dialog::backdrop{background:rgba(31,29,26,.45)}
 <div class="saveRow"><button class="btn" type="button" id="eSave">שמירה</button><span class="saved" id="eMsg" role="status"></span></div>
 </div>
 </div>
+</dialog>
+
+<dialog id="bk" aria-labelledby="bkT">
+<div class="dh"><div><h2 id="bkT">קביעת פגישה בבית הלקוח</h2><div class="sub">הזימון יישלח לכפיר ולמשרד פיתוחי חותם</div></div><button class="x" type="button" id="bkClose" aria-label="סגירה">×</button></div>
+<div class="db"><div class="ed">
+<label for="bkQ">ליד</label>
+<input id="bkQ" type="search" placeholder="חיפוש לפי שם, טלפון או יישוב">
+<select id="bkLead" size="5" style="min-height:130px"></select>
+<div class="row2">
+<div><label for="bkDate">תאריך</label><input id="bkDate" type="date"></div>
+<div><label for="bkTime">שעה</label><input id="bkTime" type="time" step="900" value="11:00"></div>
+<div><label for="bkDur">משך</label><select id="bkDur"><option value="60">שעה</option><option value="90" selected>שעה וחצי</option><option value="120">שעתיים</option></select></div>
+</div>
+<label for="bkAddr">כתובת מלאה</label><input id="bkAddr" placeholder="רחוב, מספר, יישוב">
+<div class="hint">הכתובת נכנסת לזימון, וגואל יכול לפתוח ממנה ניווט.</div>
+<label for="bkNotes">מה חשוב שגואל יידע</label><textarea id="bkNotes" placeholder="סוג הגג, מה רוצים לבנות, גודל, תקציב, מי יהיה בפגישה"></textarea>
+<div class="warn" id="bkWarn" role="alert"></div>
+<div class="saveRow"><button class="btn" type="button" id="bkSave">קביעה ושליחת זימונים</button></div>
+</div></div>
 </dialog>
 
 <script>
@@ -280,6 +343,7 @@ function openLead(row){
   $('dSub').textContent=[x.date,x.srcLabel].filter(Boolean).join(' · ');
   var tel=(x.phone||'').replace(/\D/g,'');
   $('dActs').innerHTML=(tel?'<a class="btn" href="tel:'+tel+'">חיוג '+esc(x.phone)+'</a><a class="btn wa" target="_blank" rel="noopener" href="'+waLink(x)+'">וואטסאפ עם הודעה מוכנה</a>':'<span class="note" style="margin:0">אין טלפון. לפנות דרך פייסבוק או אינסטגרם.</span>');
+  $('dActs').insertAdjacentHTML('beforeend','<button class="btn ghost" type="button" id="dBook">קביעת פגישה</button>');
   $('dKv').innerHTML='<dt>יישוב</dt><dd>'+esc(x.city||'לא צוין')+'</dd>'+Object.keys(LABELS).filter(function(k){return x[k]&&k!=='src';}).map(function(k){return '<dt>'+LABELS[k]+'</dt><dd>'+esc(x[k])+'</dd>';}).join('');
   $('eStatus').value=x.status;$('eNext').value=x.next;$('eNotes').value=x.talk;$('eMsg').textContent='';
   $('dlg').showModal();
@@ -301,13 +365,101 @@ $('logout').addEventListener('click',function(){store('pc_key',null);location.re
 $('stats').addEventListener('click',function(e){var b=e.target.closest('.stat');if(!b)return;FILTER_STAT=b.dataset.s;$('fStatus').value='';render();});
 document.querySelector('thead').addEventListener('click',function(e){var th=e.target.closest('th[data-k]');if(!th||th.dataset.k==='phone')return;if(SORT.k===th.dataset.k)SORT.dir*=-1;else{SORT.k=th.dataset.k;SORT.dir=th.dataset.k==='date'?-1:1;}render();});
 function quickStatus(e){var el=e.target;if(!el.matches||!el.matches('select.st'))return;var x=DATA.items.filter(function(i){return String(i.row)===el.dataset.row;})[0];if(!x)return;var prev=x.status,val=el.value;el.className='st '+(STCLS[val]||'')+' saving';el.disabled=true;toast('שומר סטטוס: '+val,null,true);
-  call({action:'save',row:x.row,name:x.name,phone:x.phone,status:val}).then(function(r){el.disabled=false;if(r.ok){x.status=val;render();toast('הסטטוס נשמר: '+val);}else{toast('הסטטוס לא נשמר','err');el.value=prev;el.className='st '+(STCLS[prev]||'');if(r.error==='changed'){toast('השורה השתנתה בגיליון. מרעננים את הרשימה.','err');refresh();}else alert('הסטטוס לא נשמר. אפשר לנסות שוב.');}}).catch(function(){el.disabled=false;el.value=prev;el.className='st '+(STCLS[prev]||'');toast('אין חיבור לשרת. הסטטוס לא נשמר.','err');});}
+  call({action:'save',row:x.row,name:x.name,phone:x.phone,status:val}).then(function(r){el.disabled=false;if(r.ok){x.status=val;render();toast('הסטטוס נשמר: '+val);}else{toast('הסטטוס לא נשמר','err');el.value=prev;el.className='st '+(STCLS[prev]||'');if(r.error==='changed'){toast('השורה השתנתה בגיליון. מרעננים את הרשימה.','err');refresh();}}}).catch(function(){el.disabled=false;el.value=prev;el.className='st '+(STCLS[prev]||'');toast('אין חיבור לשרת. הסטטוס לא נשמר.','err');});}
 function rowClick(e){if(e.target.closest('select.st'))return;var r=e.target.closest('[data-row]');if(r)openLead(r.dataset.row);}
 function rowKey(e){if(e.target.closest('select.st'))return;if(e.key==='Enter'){var r=e.target.closest('[data-row]');if(r)openLead(r.dataset.row);}}
 ['rows','cards'].forEach(function(id){$(id).addEventListener('change',quickStatus);$(id).addEventListener('click',rowClick);$(id).addEventListener('keydown',rowKey);});
 $('dClose').addEventListener('click',function(){$('dlg').close();});
 $('eSave').addEventListener('click',save);
-document.querySelectorAll('.tabs button').forEach(function(t){t.addEventListener('click',function(){document.querySelectorAll('.tabs button').forEach(function(o){o.setAttribute('aria-selected',o===t?'true':'false');});$('tab-leads').hidden=t.dataset.tab!=='leads';$('tab-sources').hidden=t.dataset.tab!=='sources';});});
+document.querySelectorAll('.tabs button').forEach(function(t){t.addEventListener('click',function(){showTab(t.dataset.tab);});});
+/* ---------- calendar ---------- */
+var WK=weekStart(new Date()),EVENTS=[],SLOTS=['11:00','13:00','15:00'],MEETDAYS=[0,1,2],DN=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+function weekStart(d){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-x.getDay());return x;}
+function addDays(d,n){var x=new Date(d);x.setDate(x.getDate()+n);return x;}
+function ymd(d){return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);}
+function dm(d){return d.getDate()+'.'+(d.getMonth()+1);}
+function hm(d){return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);}
+function cityOf(e){var l=e.loc||'';var p=l.split(',');return (p[p.length-1]||'').trim()||'';}
+function loadCal(){
+  var from=WK,to=addDays(WK,7);$('wkLbl').textContent=dm(from)+' – '+dm(addDays(WK,4));
+  $('calMsg').style.display='flex';$('cal').classList.add('calload');
+  return call({action:'cal',from:from.toISOString(),to:to.toISOString()}).then(function(r){
+    $('calMsg').style.display='none';$('cal').classList.remove('calload');
+    if(!r.ok){toast(r.error==='auth'?'היומן עוד לא מחובר. צריך לאשר הרשאה ב-Apps Script.':'לא הצלחנו לטעון את היומן.','err');EVENTS=[];}
+    else EVENTS=r.events.map(function(e){e.s=new Date(e.start);e.e=new Date(e.end);return e;});
+    renderCal();
+  }).catch(function(){$('calMsg').style.display='none';$('cal').classList.remove('calload');toast('אין חיבור לשרת. היומן לא נטען.','err');});
+}
+function renderCal(){
+  var today=ymd(new Date()),html='';
+  for(var i=0;i<5;i++){
+    var d=addDays(WK,i),k=ymd(d),meet=MEETDAYS.indexOf(i)>=0;
+    var evs=EVENTS.filter(function(e){return ymd(e.s)===k;}).sort(function(a,b){return a.s-b.s;});
+    var cities=evs.map(cityOf).filter(Boolean).filter(function(c,j,a){return a.indexOf(c)===j;});
+    var items=evs.map(function(e){return {t:hm(e.s),ev:e};});
+    if(meet)SLOTS.forEach(function(s){var sh=Number(s.split(':')[0]);var taken=evs.some(function(e){var a=e.s.getHours()+e.s.getMinutes()/60;return a>=sh-1&&a<sh+1.99;});if(!taken)items.push({t:s,free:true});});
+    items.sort(function(a,b){return a.t<b.t?-1:a.t>b.t?1:0;});
+    var past=k<today;
+    html+='<div class="day'+(meet?' mt':'')+(k===today?' today':'')+(past?' past':'')+'"><div class="dhd"><b>'+DN[i]+' '+dm(d)+'</b><span>'+evs.length+(meet?'/3':'')+' פגישות</span></div><div class="dcities">'+esc(cities.join(' · '))+'</div>';
+    items.forEach(function(it){
+      if(it.free){html+=past?'':'<button type="button" class="free" data-d="'+k+'" data-t="'+it.t+'"><b>'+it.t+'</b><span>פנוי · קביעה</span></button>';return;}
+      var e=it.ev,addr=e.loc?'<a target="_blank" rel="noopener" href="https://waze.com/ul?q='+encodeURIComponent(e.loc)+'&navigate=yes">ניווט</a>':'';
+      html+='<div class="ev"><span class="t">'+hm(e.s)+'–'+hm(e.e)+'</span><span class="n">'+esc(e.title.replace(/^פגישה:\s*/,''))+'</span>'+(e.loc?'<span class="l">'+esc(e.loc)+'</span>':'')+'<span class="a">'+(e.row?'<button type="button" data-open="'+esc(e.row)+'">כרטיס ליד</button>':'')+addr+(past?'':'<button type="button" class="cx" data-cx="'+esc(e.id)+'">ביטול</button>')+'</span></div>';
+    });
+    if(!past)html+='<button type="button" class="other" data-d="'+k+'" data-t="">שעה אחרת</button>';
+    html+='</div>';
+  }
+  $('cal').innerHTML=html;
+}
+var BKROW=null;
+function bkList(){
+  var q=$('bkQ').value.trim().toLowerCase().replace(/-/g,'');
+  var L=DATA.items.filter(function(x){return ['נסגר','לא רלוונטי'].indexOf(x.status)<0;}).filter(function(x){return !q||(x.name+' '+x.phone.replace(/\D/g,'')+' '+x.city).toLowerCase().indexOf(q)>=0;});
+  $('bkLead').innerHTML=L.map(function(x){return '<option value="'+x.row+'"'+(String(x.row)===String(BKROW)?' selected':'')+'>'+esc(x.name+' · '+(x.city||'בלי יישוב')+' · '+(x.phone||'בלי טלפון')+' · '+x.status)+'</option>';}).join('');
+}
+function bkOpen(row,date,time){
+  BKROW=row||null;$('bkQ').value='';bkList();
+  $('bkDate').value=date||ymd(addDays(WK,0)<new Date()?addDays(weekStart(new Date()),7):WK);
+  $('bkTime').value=time||'11:00';$('bkDur').value='90';$('bkWarn').textContent='';
+  var x=row&&DATA.items.filter(function(i){return String(i.row)===String(row);})[0];
+  $('bkAddr').value=x&&x.city?(', '+x.city):'';$('bkNotes').value=x?[x.plan,x.property,x.budget?('תקציב: '+x.budget):''].filter(Boolean).join('\n'):'';
+  $('bk').showModal();(x?$('bkAddr'):$('bkQ')).focus();if(x)$('bkAddr').setSelectionRange(0,0);
+}
+function bkSave(force){
+  var row=$('bkLead').value,x=DATA.items.filter(function(i){return String(i.row)===String(row);})[0];
+  if(!x){$('bkWarn').textContent='צריך לבחור ליד מהרשימה.';return;}
+  if(!$('bkDate').value||!$('bkTime').value){$('bkWarn').textContent='חסר תאריך או שעה.';return;}
+  if($('bkAddr').value.replace(/[,\s]/g,'').length<4){$('bkWarn').textContent='חסרה כתובת מלאה. גואל צריך אותה כדי להגיע.';return;}
+  var p=$('bkDate').value.split('-'),h=$('bkTime').value.split(':');
+  var st=new Date(+p[0],+p[1]-1,+p[2],+h[0],+h[1]);
+  if(st<new Date()){$('bkWarn').textContent='המועד כבר עבר.';return;}
+  var b=$('bkSave');btnLoad(b,true,'קובע ושולח זימונים...');$('bkWarn').textContent='';
+  call({action:'book',row:x.row,name:x.name,phone:x.phone,start:st.toISOString(),mins:+$('bkDur').value,address:$('bkAddr').value,notes:$('bkNotes').value,force:!!force}).then(function(r){
+    btnLoad(b,false);
+    if(r.ok){x.status='נקבעה פגישה';x.next=r.next||x.next;$('bk').close();if($('dlg').open)$('dlg').close();render();toast('הפגישה נקבעה והזימונים נשלחו');WK=weekStart(st);showTab('cal');}
+    else if(r.error==='busy'){if(confirm('יש כבר פגישה בזמן הזה: '+r.with+'. לקבוע בכל זאת?'))bkSave(true);}
+    else if(r.error==='changed'){$('bkWarn').textContent='השורה השתנתה בגיליון. מרעננים, ואז לנסות שוב.';refresh();}
+    else if(r.error==='auth'){$('bkWarn').textContent='היומן עוד לא מחובר. צריך לאשר הרשאה ב-Apps Script.';}
+    else $('bkWarn').textContent='הפגישה לא נקבעה. אפשר לנסות שוב.';
+  }).catch(function(){btnLoad(b,false);$('bkWarn').textContent='אין חיבור לשרת. הפגישה לא נקבעה.';});
+}
+function cancelEv(id,btn){
+  var e=EVENTS.filter(function(x){return x.id===id;})[0];if(!e)return;
+  if(!confirm('לבטל את הפגישה עם '+e.title.replace(/^פגישה:\s*/,'')+' ב-'+dm(e.s)+' '+hm(e.s)+'?'))return;
+  btn.disabled=true;toast('מבטל את הפגישה...',null,true);
+  call({action:'unbook',id:id}).then(function(r){if(r.ok){toast('הפגישה בוטלה');if(r.row){var x=DATA.items.filter(function(i){return String(i.row)===String(r.row);})[0];if(x&&r.status){x.status=r.status;render();}}loadCal();}else{btn.disabled=false;toast('הביטול נכשל','err');}}).catch(function(){btn.disabled=false;toast('אין חיבור לשרת. לא בוטל.','err');});
+}
+function showTab(name){document.querySelectorAll('.tabs button').forEach(function(o){o.setAttribute('aria-selected',o.dataset.tab===name?'true':'false');});['leads','cal','sources'].forEach(function(n){$('tab-'+n).hidden=n!==name;});if(name==='cal')loadCal();}
+$('wkPrev').addEventListener('click',function(){WK=addDays(WK,-7);loadCal();});
+$('wkNext').addEventListener('click',function(){WK=addDays(WK,7);loadCal();});
+$('wkToday').addEventListener('click',function(){WK=weekStart(new Date());loadCal();});
+$('bkNew').addEventListener('click',function(){bkOpen(null);});
+$('cal').addEventListener('click',function(e){var f=e.target.closest('[data-d]');if(f){bkOpen(null,f.dataset.d,f.dataset.t||'');return;}var o=e.target.closest('[data-open]');if(o){openLead(o.dataset.open);return;}var c=e.target.closest('[data-cx]');if(c)cancelEv(c.dataset.cx,c);});
+$('bkQ').addEventListener('input',bkList);
+$('bkLead').addEventListener('change',function(){BKROW=this.value;var x=DATA.items.filter(function(i){return String(i.row)===String(BKROW);})[0];if(x&&!$('bkAddr').value.trim())$('bkAddr').value=x.city?(', '+x.city):'';});
+$('bkClose').addEventListener('click',function(){$('bk').close();});
+$('bkSave').addEventListener('click',function(){bkSave(false);});
+$('dActs').addEventListener('click',function(e){if(e.target.id==='dBook'&&CUR)bkOpen(CUR.row);});
 var saved=load('pc_key');if(saved){$('code').value=saved;login(saved);}
 })();
 </script>
