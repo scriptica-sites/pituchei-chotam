@@ -170,6 +170,12 @@ body.nopay .payonly{display:none!important}
 #bk .hint{font-size:13px;color:var(--muted);margin-top:4px}
 @media (max-width:820px){.cal{grid-template-columns:1fr}.day{min-height:0}#bk .ed .row2{grid-template-columns:1fr 1fr}}
 @media (max-width:820px){.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.filters{grid-template-columns:1fr 1fr}.filters input{grid-column:1/-1}.tbl.leads{display:none}.cards{display:grid}.kv{grid-template-columns:100px 1fr}header.top .upd{display:none}}
+/* call notes on cards and rows */
+.tk{display:flex;flex-direction:column;gap:3px;font-size:13px;line-height:1.5;color:var(--ink2);min-width:180px;max-width:320px}
+.tk .nx{font-weight:600;color:var(--ink)}
+.tk .tt{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}
+.tk .none{color:var(--muted)}
+.lc .tk{background:var(--cream);border-radius:8px;padding:8px 10px;margin-top:6px;max-width:none;font-size:14px}
 /* mobile (iPhone & Android) */
 .qa{display:none}
 @media (max-width:820px){
@@ -263,6 +269,7 @@ body.nopay .payonly{display:none!important}
 <th data-k="phone">טלפון</th>
 <th data-k="city">יישוב <span class="ar"></span></th>
 <th data-k="plan">מה מתכננים <span class="ar"></span></th>
+<th data-k="talk">הערות שיחה / צעד הבא</th>
 <th data-k="level">רלוונטיות <span class="ar"></span></th>
 <th data-k="partner">שותף / מקור <span class="ar"></span></th>
 <th data-k="owner">אחראי <span class="ar"></span></th>
@@ -446,9 +453,9 @@ function render(){
   var f=filtered();
   $('count').textContent=f.length+' מתוך '+it.length+' לידים · פגישות ומעלה: '+met;
   document.querySelectorAll('th[data-k]').forEach(function(th){var a=th.querySelector('.ar');if(a)a.textContent=th.dataset.k===SORT.k?(SORT.dir>0?'▲':'▼'):'';});
-  if(!f.length){$('rows').innerHTML='<tr><td colspan="9" class="empty">אין לידים שמתאימים לסינון.</td></tr>';$('cards').innerHTML='<div class="empty">אין לידים שמתאימים לסינון.</div>';return;}
-  $('rows').innerHTML=f.map(function(x){return '<tr tabindex="0" data-row="'+x.row+'"><td>'+esc(x.date.slice(0,10))+'</td><td class="l"><b>'+esc(x.name)+'</b></td><td dir="ltr">'+esc(x.phone)+'</td><td>'+esc(x.city)+'</td><td class="l">'+esc(x.plan)+'</td><td class="lvl">'+esc(x.level)+'</td><td>'+esc(x.srcLabel)+'</td><td class="own'+(x.owner?'':' none')+'">'+esc(x.owner||'—')+'</td><td><select class="st '+(STCLS[x.status]||'')+'" data-row="'+x.row+'" aria-label="סטטוס של '+esc(x.name)+'">'+DATA.statuses.map(function(o){return '<option'+(o===x.status?' selected':'')+'>'+esc(o)+'</option>';}).join('')+'</select></td></tr>';}).join('');
-  $('cards').innerHTML=f.map(function(x){return '<div class="lc" tabindex="0" data-row="'+x.row+'"><div class="h"><b>'+esc(x.name)+'</b><select class="st '+(STCLS[x.status]||'')+'" data-row="'+x.row+'" aria-label="סטטוס של '+esc(x.name)+'">'+DATA.statuses.map(function(o){return '<option'+(o===x.status?' selected':'')+'>'+esc(o)+'</option>';}).join('')+'</select></div><div class="m" dir="ltr" style="text-align:right">'+esc(x.phone)+'</div><div class="m">'+esc([x.city,x.plan].filter(Boolean).join(' · '))+'</div><div class="m">'+esc(x.date.slice(0,10))+' · '+esc(x.srcLabel)+(x.owner?' · אחראי: '+esc(x.owner):'')+'</div>'+(function(){var t=(x.phone||'').replace(/\D/g,'');return t?'<div class="qa"><a href="tel:'+t+'">חיוג</a><a class="wa" target="_blank" rel="noopener" href="'+waLink(x)+'">וואטסאפ</a></div>':'';})()+'</div>';}).join('');
+  if(!f.length){$('rows').innerHTML='<tr><td colspan="10" class="empty">אין לידים שמתאימים לסינון.</td></tr>';$('cards').innerHTML='<div class="empty">אין לידים שמתאימים לסינון.</div>';return;}
+  $('rows').innerHTML=f.map(function(x){return '<tr tabindex="0" data-row="'+x.row+'"><td>'+esc(x.date.slice(0,10))+'</td><td class="l"><b>'+esc(x.name)+'</b></td><td dir="ltr">'+esc(x.phone)+'</td><td>'+esc(x.city)+'</td><td class="l">'+esc(x.plan)+'</td><td class="l"><div class="tk">'+talkHtml(x)+'</div></td><td class="lvl">'+esc(x.level)+'</td><td>'+esc(x.srcLabel)+'</td><td class="own'+(x.owner?'':' none')+'">'+esc(x.owner||'—')+'</td><td><select class="st '+(STCLS[x.status]||'')+'" data-row="'+x.row+'" aria-label="סטטוס של '+esc(x.name)+'">'+DATA.statuses.map(function(o){return '<option'+(o===x.status?' selected':'')+'>'+esc(o)+'</option>';}).join('')+'</select></td></tr>';}).join('');
+  $('cards').innerHTML=f.map(function(x){return '<div class="lc" tabindex="0" data-row="'+x.row+'"><div class="h"><b>'+esc(x.name)+'</b><select class="st '+(STCLS[x.status]||'')+'" data-row="'+x.row+'" aria-label="סטטוס של '+esc(x.name)+'">'+DATA.statuses.map(function(o){return '<option'+(o===x.status?' selected':'')+'>'+esc(o)+'</option>';}).join('')+'</select></div><div class="m" dir="ltr" style="text-align:right">'+esc(x.phone)+'</div><div class="m">'+esc([x.city,x.plan].filter(Boolean).join(' · '))+'</div><div class="m">'+esc(x.date.slice(0,10))+' · '+esc(x.srcLabel)+(x.owner?' · אחראי: '+esc(x.owner):'')+'</div>'+(x.next||x.talk?'<div class="tk">'+talkHtml(x)+'</div>':'')+(function(){var t=(x.phone||'').replace(/\D/g,'');return t?'<div class="qa"><a href="tel:'+t+'">חיוג</a><a class="wa" target="_blank" rel="noopener" href="'+waLink(x)+'">וואטסאפ</a></div>':'';})()+'</div>';}).join('');
   renderSources();
 }
 function renderSources(){
@@ -484,9 +491,10 @@ $('refresh').addEventListener('click',refresh);
 $('logout').addEventListener('click',function(){store('pc_key',null);store('pc_data',null);location.reload();});
 ['q','fStatus','fPartner','fSource','fPhone','fOwner'].forEach(function(id){$(id).addEventListener('input',function(){if(id==='fStatus')FILTER_STAT='';render();});});
 $('stats').addEventListener('click',function(e){var b=e.target.closest('.stat');if(!b)return;FILTER_STAT=b.dataset.s;$('fStatus').value='';render();});
-document.querySelector('thead').addEventListener('click',function(e){var th=e.target.closest('th[data-k]');if(!th||th.dataset.k==='phone')return;if(SORT.k===th.dataset.k)SORT.dir*=-1;else{SORT.k=th.dataset.k;SORT.dir=th.dataset.k==='date'?-1:1;}render();});
+document.querySelector('thead').addEventListener('click',function(e){var th=e.target.closest('th[data-k]');if(!th||th.dataset.k==='phone'||th.dataset.k==='talk')return;if(SORT.k===th.dataset.k)SORT.dir*=-1;else{SORT.k=th.dataset.k;SORT.dir=th.dataset.k==='date'?-1:1;}render();});
 function quickStatus(e){var el=e.target;if(!el.matches||!el.matches('select.st'))return;var x=DATA.items.filter(function(i){return String(i.row)===el.dataset.row;})[0];if(!x)return;var prev=x.status,val=el.value;el.className='st '+(STCLS[val]||'')+' saving';el.disabled=true;toast('שומר סטטוס: '+val,null,true);
   call({action:'save',row:x.row,name:x.name,phone:x.phone,status:val}).then(function(r){el.disabled=false;if(r.ok){x.status=val;if(val==='נסגר'&&!x.close)x.close=today();if(r.owner!=null){x.owner=r.owner;x.lastby=r.lastby;}render();toast('הסטטוס נשמר: '+val);}else{toast('הסטטוס לא נשמר','err');el.value=prev;el.className='st '+(STCLS[prev]||'');if(r.error==='changed'){toast('השורה השתנתה בגיליון. מרעננים את הרשימה.','err');refresh();}}}).catch(function(){el.disabled=false;el.value=prev;el.className='st '+(STCLS[prev]||'');toast('אין חיבור לשרת. הסטטוס לא נשמר.','err');});}
+function talkHtml(x){var o='';if(x.next)o+='<span class="nx">צעד הבא: '+esc(x.next)+'</span>';if(x.talk)o+='<span class="tt" title="'+esc(x.talk)+'">'+esc(x.talk)+'</span>';return o||'<span class="none">—</span>';}
 function rowClick(e){if(e.target.closest('select.st,a'))return;var r=e.target.closest('[data-row]');if(r)openLead(r.dataset.row);}
 function rowKey(e){if(e.target.closest('select.st'))return;if(e.key==='Enter'){var r=e.target.closest('[data-row]');if(r)openLead(r.dataset.row);}}
 ['rows','cards'].forEach(function(id){$(id).addEventListener('change',quickStatus);$(id).addEventListener('click',rowClick);$(id).addEventListener('keydown',rowKey);});
