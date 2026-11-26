@@ -170,6 +170,12 @@ body.nopay .payonly{display:none!important}
 #bk .hint{font-size:13px;color:var(--muted);margin-top:4px}
 @media (max-width:820px){.cal{grid-template-columns:1fr}.day{min-height:0}#bk .ed .row2{grid-template-columns:1fr 1fr}}
 @media (max-width:820px){.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.filters{grid-template-columns:1fr 1fr}.filters input{grid-column:1/-1}.tbl.leads{display:none}.cards{display:grid}.kv{grid-template-columns:100px 1fr}header.top .upd{display:none}}
+/* no-answer counter + archive */
+.nabg{display:inline-block;font-size:12px;font-weight:600;color:#8A5A1E;background:#F6E9D3;border-radius:999px;padding:1px 8px;margin-inline-start:6px;white-space:nowrap}
+.nabg.arch{color:var(--muted);background:var(--sand)}
+td .nabg{display:block;margin:4px auto 0;width:max-content}
+.qa .nab{flex:1;min-height:40px;border-radius:10px;border:1px solid #E2C9A0;background:#FBF3E6;color:#8A5A1E;font:inherit;font-weight:600;font-size:14px;cursor:pointer}
+.qa .nab.loading{opacity:.7}
 /* call notes on cards and rows */
 .tk{display:flex;flex-direction:column;gap:3px;font-size:13px;line-height:1.5;color:var(--ink2);min-width:180px;max-width:320px}
 .tk .nx{font-weight:600;color:var(--ink)}
@@ -384,7 +390,7 @@ body.nopay .payonly{display:none!important}
 (function(){
 var API='https://script.google.com/macros/s/AKfycbyNUXPd1BSIjdQEL42h5gQDsNkdEEv_D5m2NzTy1FWrrwUiMT7t7I2DOorCZkyt8O8FnA/exec';
 var KEY='', DATA=null, SORT={k:'date',dir:-1}, FILTER_STAT='', CUR=null;
-var COLS=['date','status','name','phone','city','region','plan','property','permit','budget','when','architect','notes','src','partner','reason','next','talk','id','owner','lastby','close','reward','firstpay','paid1','paid2'];
+var COLS=['date','status','name','phone','city','region','plan','property','permit','budget','when','architect','notes','src','partner','reason','next','talk','id','owner','lastby','close','reward','firstpay','paid1','paid2','noans','arch'];
 var STCLS={'חדש':'s-new','לבדיקה':'s-check','אין מענה':'s-noans','בטיפול':'s-work','נקבעה פגישה':'s-meet','היה בפגישה':'s-met','נסגר':'s-won','לא רלוונטי':'s-lost'};
 var LABELS={region:'אזור',plan:'מה מתכננים',property:'פרטי הנכס',permit:'היתר',budget:'תקציב',when:'מתי מתחילים',architect:'אדריכל',notes:'הערות הלקוח',src:'קוד מקור',partner:'שותף מפנה',reason:'רמת רלוונטיות'};
 function $(id){return document.getElementById(id);}
@@ -420,7 +426,7 @@ function prep(){
   var cp=!!DATA.canPay;document.querySelector('.tabs [data-tab=pay]').hidden=!cp;document.body.classList.toggle('nopay',!cp);
   renderLog();renderPay();
   var now=new Date();$('upd').textContent='עודכן '+now.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
-  var fs=$('fStatus'),cur=fs.value;fs.innerHTML='<option value="">כל הסטטוסים</option>'+DATA.statuses.map(function(s){return '<option>'+esc(s)+'</option>';}).join('');fs.value=cur;
+  var fs=$('fStatus'),cur=fs.value;fs.innerHTML='<option value="">כל הסטטוסים</option>'+DATA.statuses.map(function(s){return '<option>'+esc(s)+'</option>';}).join('')+'<option value="__arch">ארכיון</option>';fs.value=cur;
   var ps={};DATA.items.forEach(function(x){if(x.partner)ps[x.partner]=1;});Object.keys(DATA.codes||{}).forEach(function(k){ps[DATA.codes[k]]=1;});
   var fp=$('fPartner');cur=fp.value;fp.innerHTML='<option value="">כל השותפים</option><option value="__none">בלי שותף</option>'+Object.keys(ps).sort().map(function(p){return '<option>'+esc(p)+'</option>';}).join('');fp.value=cur;
   var ss={};DATA.items.forEach(function(x){ss[x.srcLabel]=1;});
@@ -430,7 +436,7 @@ function prep(){
 function filtered(){
   var q=$('q').value.trim().toLowerCase(),st=$('fStatus').value||FILTER_STAT,pa=$('fPartner').value,so=$('fSource').value,ph=$('fPhone').value,ow=$('fOwner').value;
   return DATA.items.filter(function(x){
-    if(st&&x.status!==st)return false;
+    if(st==='__arch'){if(!x.arch)return false;}else{if(x.arch)return false;if(st&&x.status!==st)return false;}
     if(pa==='__none'&&x.partner)return false;
     if(pa&&pa!=='__none'&&x.partner!==pa)return false;
     if(so&&x.srcLabel!==so)return false;
@@ -446,16 +452,16 @@ function filtered(){
   });
 }
 function render(){
-  var it=DATA.items,c=function(s){return it.filter(function(x){return x.status===s;}).length;};
+  var it=DATA.items.filter(function(x){return !x.arch;}),c=function(s){return it.filter(function(x){return x.status===s;}).length;};
   var met=it.filter(function(x){return ['נקבעה פגישה','היה בפגישה','נסגר'].indexOf(x.status)>=0;}).length;
   var S=[['','כל הלידים',it.length],['חדש','חדשים',c('חדש')],['לבדיקה','לבדיקה',c('לבדיקה')],['אין מענה','אין מענה',c('אין מענה')],['נקבעה פגישה','נקבעה פגישה',c('נקבעה פגישה')],['נסגר','נסגרו',c('נסגר')]];
   $('stats').innerHTML=S.map(function(s){return '<button type="button" class="stat" data-s="'+esc(s[0])+'" aria-pressed="'+(FILTER_STAT===s[0]&&!$('fStatus').value?'true':'false')+'"><b>'+s[2]+'</b><span>'+esc(s[1])+'</span></button>';}).join('');
   var f=filtered();
-  $('count').textContent=f.length+' מתוך '+it.length+' לידים · פגישות ומעלה: '+met;
+  var narch=DATA.items.length-it.length;$('count').textContent=f.length+' מתוך '+it.length+' לידים · פגישות ומעלה: '+met+(narch?' · בארכיון: '+narch:'');
   document.querySelectorAll('th[data-k]').forEach(function(th){var a=th.querySelector('.ar');if(a)a.textContent=th.dataset.k===SORT.k?(SORT.dir>0?'▲':'▼'):'';});
   if(!f.length){$('rows').innerHTML='<tr><td colspan="10" class="empty">אין לידים שמתאימים לסינון.</td></tr>';$('cards').innerHTML='<div class="empty">אין לידים שמתאימים לסינון.</div>';return;}
-  $('rows').innerHTML=f.map(function(x){return '<tr tabindex="0" data-row="'+x.row+'"><td>'+esc(x.date.slice(0,10))+'</td><td class="l"><b>'+esc(x.name)+'</b></td><td dir="ltr">'+esc(x.phone)+'</td><td>'+esc(x.city)+'</td><td class="l">'+esc(x.plan)+'</td><td class="l"><div class="tk">'+talkHtml(x)+'</div></td><td class="lvl">'+esc(x.level)+'</td><td>'+esc(x.srcLabel)+'</td><td class="own'+(x.owner?'':' none')+'">'+esc(x.owner||'—')+'</td><td><select class="st '+(STCLS[x.status]||'')+'" data-row="'+x.row+'" aria-label="סטטוס של '+esc(x.name)+'">'+DATA.statuses.map(function(o){return '<option'+(o===x.status?' selected':'')+'>'+esc(o)+'</option>';}).join('')+'</select></td></tr>';}).join('');
-  $('cards').innerHTML=f.map(function(x){return '<div class="lc" tabindex="0" data-row="'+x.row+'"><div class="h"><b>'+esc(x.name)+'</b><select class="st '+(STCLS[x.status]||'')+'" data-row="'+x.row+'" aria-label="סטטוס של '+esc(x.name)+'">'+DATA.statuses.map(function(o){return '<option'+(o===x.status?' selected':'')+'>'+esc(o)+'</option>';}).join('')+'</select></div><div class="m" dir="ltr" style="text-align:right">'+esc(x.phone)+'</div><div class="m">'+esc([x.city,x.plan].filter(Boolean).join(' · '))+'</div><div class="m">'+esc(x.date.slice(0,10))+' · '+esc(x.srcLabel)+(x.owner?' · אחראי: '+esc(x.owner):'')+'</div>'+(x.next||x.talk?'<div class="tk">'+talkHtml(x)+'</div>':'')+(function(){var t=(x.phone||'').replace(/\D/g,'');return t?'<div class="qa"><a href="tel:'+t+'">חיוג</a><a class="wa" target="_blank" rel="noopener" href="'+waLink(x)+'">וואטסאפ</a></div>':'';})()+'</div>';}).join('');
+  $('rows').innerHTML=f.map(function(x){return '<tr tabindex="0" data-row="'+x.row+'"><td>'+esc(x.date.slice(0,10))+'</td><td class="l"><b>'+esc(x.name)+'</b></td><td dir="ltr">'+esc(x.phone)+'</td><td>'+esc(x.city)+'</td><td class="l">'+esc(x.plan)+'</td><td class="l"><div class="tk">'+talkHtml(x)+'</div></td><td class="lvl">'+esc(x.level)+'</td><td>'+esc(x.srcLabel)+'</td><td class="own'+(x.owner?'':' none')+'">'+esc(x.owner||'—')+'</td><td><select class="st '+(STCLS[x.status]||'')+'" data-row="'+x.row+'" aria-label="סטטוס של '+esc(x.name)+'">'+DATA.statuses.map(function(o){return '<option'+(o===x.status?' selected':'')+'>'+esc(o)+'</option>';}).join('')+'</select>'+naBadge(x)+'</td></tr>';}).join('');
+  $('cards').innerHTML=f.map(function(x){return '<div class="lc" tabindex="0" data-row="'+x.row+'"><div class="h"><b>'+esc(x.name)+'</b><select class="st '+(STCLS[x.status]||'')+'" data-row="'+x.row+'" aria-label="סטטוס של '+esc(x.name)+'">'+DATA.statuses.map(function(o){return '<option'+(o===x.status?' selected':'')+'>'+esc(o)+'</option>';}).join('')+'</select></div><div class="m" dir="ltr" style="text-align:right">'+esc(x.phone)+'</div><div class="m">'+esc([x.city,x.plan].filter(Boolean).join(' · '))+'</div><div class="m">'+esc(x.date.slice(0,10))+' · '+esc(x.srcLabel)+(x.owner?' · אחראי: '+esc(x.owner):'')+naBadge(x)+'</div>'+(x.next||x.talk?'<div class="tk">'+talkHtml(x)+'</div>':'')+(function(){var t=(x.phone||'').replace(/\D/g,'');return t?'<div class="qa"><a href="tel:'+t+'">חיוג</a><a class="wa" target="_blank" rel="noopener" href="'+waLink(x)+'">וואטסאפ</a>'+(x.arch?'':'<button type="button" class="nab" data-na="'+x.row+'">לא ענה +1</button>')+'</div>':'';})()+'</div>';}).join('');
   renderSources();
 }
 function renderSources(){
@@ -471,7 +477,7 @@ function openLead(row){
   $('dSub').textContent=[x.date,x.srcLabel].filter(Boolean).join(' · ');
   var tel=(x.phone||'').replace(/\D/g,'');
   $('dActs').innerHTML=(tel?'<a class="btn" href="tel:'+tel+'">חיוג '+esc(x.phone)+'</a><a class="btn wa" target="_blank" rel="noopener" href="'+waLink(x)+'">וואטסאפ עם הודעה מוכנה</a>':'<span class="note" style="margin:0">אין טלפון. לפנות דרך פייסבוק או אינסטגרם.</span>');
-  $('dActs').insertAdjacentHTML('beforeend','<button class="btn ghost" type="button" id="dBook">קביעת פגישה</button>');
+  $('dActs').insertAdjacentHTML('beforeend','<button class="btn ghost" type="button" id="dBook">קביעת פגישה</button>'+(tel&&!x.arch?'<button class="btn ghost" type="button" id="dNa">לא ענה +1 ('+(Number(x.noans)||0)+'/'+NA_MAX+')</button>':'')+'<button class="btn ghost" type="button" id="dArch">'+(x.arch?'החזרה מהארכיון':'העברה לארכיון')+'</button>');
   $('dKv').innerHTML='<dt>יישוב</dt><dd>'+esc(x.city||'לא צוין')+'</dd>'+Object.keys(LABELS).filter(function(k){return x[k]&&k!=='src';}).map(function(k){return '<dt>'+LABELS[k]+'</dt><dd>'+esc(x[k])+'</dd>';}).join('');
   $('eStatus').value=x.status;$('eOwner').value=x.owner||'';$('eClose').value=x.close||'';$('eReward').value=x.reward||'';$('eFirst').value=x.firstpay||'';$('ePaid1').value=x.paid1||'';$('ePaid2').value=x.paid2||'';$('eDealMsg').textContent='';$('dPartnerLbl').textContent=x.partner?((DATA.canPay?' ותגמול לשותף: ':' דרך שותף: ')+x.partner):'';document.querySelectorAll('#dDeal .pp').forEach(function(e){e.hidden=!x.partner||!DATA.canPay;});$('eLast').textContent=x.lastby?('עודכן לאחרונה: '+x.lastby):'';$('eNext').value=x.next;$('eNotes').value=x.talk;$('eMsg').textContent='';
   $('dlg').showModal();
@@ -495,7 +501,11 @@ document.querySelector('thead').addEventListener('click',function(e){var th=e.ta
 function quickStatus(e){var el=e.target;if(!el.matches||!el.matches('select.st'))return;var x=DATA.items.filter(function(i){return String(i.row)===el.dataset.row;})[0];if(!x)return;var prev=x.status,val=el.value;el.className='st '+(STCLS[val]||'')+' saving';el.disabled=true;toast('שומר סטטוס: '+val,null,true);
   call({action:'save',row:x.row,name:x.name,phone:x.phone,status:val}).then(function(r){el.disabled=false;if(r.ok){x.status=val;if(val==='נסגר'&&!x.close)x.close=today();if(r.owner!=null){x.owner=r.owner;x.lastby=r.lastby;}render();toast('הסטטוס נשמר: '+val);}else{toast('הסטטוס לא נשמר','err');el.value=prev;el.className='st '+(STCLS[prev]||'');if(r.error==='changed'){toast('השורה השתנתה בגיליון. מרעננים את הרשימה.','err');refresh();}}}).catch(function(){el.disabled=false;el.value=prev;el.className='st '+(STCLS[prev]||'');toast('אין חיבור לשרת. הסטטוס לא נשמר.','err');});}
 function talkHtml(x){var o='';if(x.next)o+='<span class="nx">צעד הבא: '+esc(x.next)+'</span>';if(x.talk)o+='<span class="tt" title="'+esc(x.talk)+'">'+esc(x.talk)+'</span>';return o||'<span class="none">—</span>';}
-function rowClick(e){if(e.target.closest('select.st,a'))return;var r=e.target.closest('[data-row]');if(r)openLead(r.dataset.row);}
+var NA_MAX=10;
+function naBadge(x){var n=Number(x.noans)||0;if(x.arch)return ' <span class="nabg arch">בארכיון</span>';return n?' <span class="nabg">לא ענה '+n+'/'+NA_MAX+'</span>':'';}
+function noAnswer(x,btn){btnLoad(btn,true,'שומר...');call({action:'save',row:x.row,name:x.name,phone:x.phone,noans:true}).then(function(r){btnLoad(btn,false);if(!r.ok){toast(r.error==='changed'?'השורה השתנתה בגיליון. מרעננים.':'לא נשמר','err');if(r.error==='changed')refresh();return;}x.noans=String(r.noans);x.status=r.status;x.talk=r.talk;x.arch=r.arch||'';if(r.owner)x.owner=r.owner;if($('dlg').open){if(x.arch)$('dlg').close();else openLead(x.row);}render();toast(x.arch?'אין מענה '+r.noans+' פעמים: הליד עבר ל"לא רלוונטי" ולארכיון':'נרשם: אין מענה ('+r.noans+'/'+NA_MAX+')');}).catch(function(){btnLoad(btn,false);toast('אין חיבור לשרת. לא נשמר.','err');});}
+function setArch(x,on,btn){btnLoad(btn,true,'שומר...');call({action:'save',row:x.row,name:x.name,phone:x.phone,archive:on}).then(function(r){btnLoad(btn,false);if(!r.ok){toast('לא נשמר','err');return;}x.arch=r.arch||'';if(!on)x.noans='';$('dlg').close();render();toast(on?'הליד הועבר לארכיון':'הליד הוחזר מהארכיון');}).catch(function(){btnLoad(btn,false);toast('אין חיבור לשרת. לא נשמר.','err');});}
+function rowClick(e){var nb=e.target.closest('[data-na]');if(nb){var xx=DATA.items.filter(function(i){return String(i.row)===nb.dataset.na;})[0];if(xx)noAnswer(xx,nb);return;}if(e.target.closest('select.st,a,button'))return;var r=e.target.closest('[data-row]');if(r)openLead(r.dataset.row);}
 function rowKey(e){if(e.target.closest('select.st'))return;if(e.key==='Enter'){var r=e.target.closest('[data-row]');if(r)openLead(r.dataset.row);}}
 ['rows','cards'].forEach(function(id){$(id).addEventListener('change',quickStatus);$(id).addEventListener('click',rowClick);$(id).addEventListener('keydown',rowKey);});
 $('dClose').addEventListener('click',function(){$('dlg').close();});
@@ -636,7 +646,7 @@ $('logRows').addEventListener('click',function(e){var a=e.target.closest('[data-
 $('bkLead').addEventListener('change',function(){BKROW=this.value;var x=DATA.items.filter(function(i){return String(i.row)===String(BKROW);})[0];if(x&&!$('bkAddr').value.trim())$('bkAddr').value=x.city?(', '+x.city):'';});
 $('bkClose').addEventListener('click',function(){$('bk').close();});
 $('bkSave').addEventListener('click',function(){bkSave(false);});
-$('dActs').addEventListener('click',function(e){if(e.target.id==='dBook'&&CUR)bkOpen(CUR.row);});
+$('dActs').addEventListener('click',function(e){if(e.target.id==='dBook'&&CUR)bkOpen(CUR.row);if(e.target.id==='dNa'&&CUR)noAnswer(CUR,e.target);if(e.target.id==='dArch'&&CUR)setArch(CUR,!CUR.arch,e.target);});
 var saved=load('pc_key'),cached=null;try{cached=JSON.parse(load('pc_data')||'null');}catch(e){}
 if(saved&&cached&&cached.ok){KEY=saved;DATA=cached;prep();$('login').hidden=true;$('app').hidden=false;render();$('upd').textContent='מעדכן...';
   call({action:'list'}).then(function(r){if(r.ok){store('pc_data',JSON.stringify(r));DATA=r;prep();render();if(!$('tab-pay').hidden)renderPay();}else if(r.error==='key'){store('pc_key',null);store('pc_data',null);location.reload();}}).catch(function(){$('upd').textContent='אין חיבור, מוצג מידע שמור';});}
