@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>פיתוחי חותם · שיטת הבנייה</title>
+<meta name="description" content="בתים פרטיים, תוספות בנייה ועליות גג. גורם ביצוע אחד, מהיסודות ועד הגג. 20 שנות ניסיון, ליווי הנדסי לכל פרויקט.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="he_IL">
+<meta property="og:site_name" content="פיתוחי חותם">
+<meta property="og:title" content="פיתוחי חותם · שיטת הבנייה">
+<meta property="og:description" content="בתים פרטיים, תוספות בנייה ועליות גג. גורם ביצוע אחד, מהיסודות ועד הגג.">
+<meta property="og:url" content="https://scriptica-sites.github.io/pituchei-chotam/shita/">
+<meta property="og:image" content="https://scriptica-sites.github.io/pituchei-chotam/shita/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#FAF9F5">
+<link rel="icon" href="logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FAF9F5;--ink:#2F352E;--ink2:#4A4F47;--muted:#7A7768;--sand:#EAE7DD;--sand2:#F3EFE5;--line:#DED7C6;--br:#9A8152}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans Hebrew",Arial,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.5}
+img{display:block;max-width:100%}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px}
+header.bar{position:sticky;top:0;z-index:5;background:rgba(250,249,245,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+header.bar .wrap{display:flex;align-items:center;justify-content:space-between;height:68px}
+header.bar img{height:44px;width:auto}
+header.bar a.call{font-size:14px;font-weight:600;color:var(--bg);background:var(--ink);padding:9px 16px;border-radius:999px;text-decoration:none}
+section{padding:56px 0;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:0}
+.eyebrow{direction:ltr;text-align:right;font-size:11px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin:0 0 6px}
+.kicker{font-size:14px;font-weight:600;color:var(--br);margin:0 0 10px}
+h1,h2{margin:0;font-weight:600;letter-spacing:-.5px}
+h1{font-size:clamp(40px,8vw,64px);line-height:1.06}
+h2{font-size:clamp(30px,6vw,44px);line-height:1.12}
+h1 span,h2 span{display:block;color:var(--br)}
+.lead{font-size:17px;line-height:1.75;color:var(--ink2);margin:16px 0 0;max-width:640px}
+.photo{border-radius:6px;overflow:hidden;background:var(--sand)}
+.photo img{width:100%;height:100%;object-fit:cover}
+.cap{font-size:12px;color:var(--muted);margin-top:8px}
+.hero .photo{aspect-ratio:13/9;margin-top:28px}
+.band{aspect-ratio:3/1;margin-top:26px}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);margin-top:26px;border-top:1px solid var(--line);padding-top:18px}
+.facts div{padding:0 14px;border-inline-start:1px solid var(--line)}
+.facts div:first-child{border:0;padding-inline-start:0}
+.facts b{display:block;font-size:30px;font-weight:600;color:var(--br);line-height:1.2}
+.facts span{font-size:14px;color:var(--ink2)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px 36px;margin-top:30px}
+.item b{display:block;font-size:17px;font-weight:600;margin-bottom:6px}
+.item p{margin:0;font-size:15px;line-height:1.7;color:var(--ink2)}
+.box{background:var(--sand);padding:22px 24px;border-radius:6px;margin-top:26px}
+.box b{display:block;font-size:18px;font-weight:600;margin-bottom:6px}
+.box p{margin:0;font-size:15px;line-height:1.7;color:var(--ink2)}
+.note{font-size:12.5px;color:var(--muted);margin-top:12px;line-height:1.6}
+.steps{margin-top:24px}
+.step{display:grid;grid-template-columns:56px 1fr;gap:4px 14px;padding:16px 0;border-top:1px solid var(--line)}
+.step .num{font-size:30px;color:var(--br);line-height:1;direction:ltr;text-align:right}
+.step b{font-size:17px;font-weight:600}
+.step p{grid-column:2;margin:0;font-size:15px;line-height:1.65;color:var(--ink2)}
+.layers{display:grid;grid-template-columns:260px 1fr;gap:32px;margin-top:30px;align-items:start}
+.wall{display:flex;flex-direction:row-reverse;height:340px;gap:3px;padding:16px 16px 30px;background:var(--sand2);border-radius:6px}
+.wall i{flex:1;position:relative;border-radius:2px}
+.wall i em{position:absolute;bottom:-4px;left:50%;transform:translate(-50%,100%);font-style:normal;font-size:12px;color:var(--muted)}
+.ll{list-style:none;margin:0;padding:0}
+.ll li{display:grid;grid-template-columns:28px 18px 1fr;gap:10px;align-items:center;padding:13px 0;border-bottom:1px solid var(--line);font-size:15px;color:var(--ink2)}
+.ll .sw{width:18px;height:18px;border-radius:3px}
+.ll .k{direction:ltr;text-align:right;color:var(--br);font-weight:600;font-size:13px}
+.strip{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:26px}
+.strip .photo{aspect-ratio:3/2}
+.strip .cap{text-align:center;font-size:13px;color:var(--ink2);font-weight:500}
+.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px}
+.trio .photo{aspect-ratio:4/5}
+.proj{display:grid;grid-template-columns:1fr 1fr;gap:0 36px;margin-top:22px}
+.proj div{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:15px}
+.proj div span{color:var(--muted);font-size:14px;text-align:left}
+.cta{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+.cta a{display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;border-radius:8px;padding:14px 10px;font-weight:600;font-size:18px}
+.cta a small{font-size:12px;font-weight:500;opacity:.8}
+.cta a span{direction:ltr}
+.cta .dark{background:var(--ink);color:var(--bg)}
+.cta .light{background:var(--bg);color:var(--ink);border:1px solid var(--line)}
+footer{text-align:center;padding:30px 20px 40px;color:var(--muted);font-size:13px}
+footer img{height:56px;width:auto;margin:0 auto 12px}
+footer a{color:var(--muted)}
+@media (max-width:640px){
+  section{padding:40px 0}
+  .grid2,.proj{grid-template-columns:1fr}
+  .grid2{gap:20px}
+  .layers{grid-template-columns:1fr}
+  .wall{height:200px}
+  .facts b{font-size:24px}
+  .facts span{font-size:12.5px}
+  .facts div{padding:0 8px}
+  .trio{gap:8px}
+  header.bar img{height:38px}
+}
+</style>
+</head>
+<body>
+
+<header class="bar"><div class="wrap">
+<img src="logo.svg" alt="פיתוחי חותם">
+<a class="call" href="tel:0545065678">054-5065678</a>
+</div></header>
+
+<main class="wrap">
+
+<section class="hero">
+<p class="eyebrow">Company profile · Building method</p>
+<p class="kicker">בתים פרטיים · תוספות בנייה · עליות גג</p>
+<h1>בונים אחרת.<span>חיים טוב יותר.</span></h1>
+<p class="lead">בנייה מתקדמת של בתים פרטיים, בהתאמה מלאה לתכנון האדריכלי. גורם ביצוע אחד, מהכלונס הראשון ועד הרעף האחרון.</p>
+<div class="photo"><img src="cover.jpg" alt="בית שבנתה פיתוחי חותם"></div>
+<div class="cap">מתוך פרויקטים שביצעה החברה</div>
+<div class="facts"><div><b>20</b><span>שנות ניסיון</span></div><div><b>01</b><span>כתובת אחת לביצוע</span></div><div><b>ליווי</b><span>מהנדס מוסמך לכל פרויקט</span></div></div>
+</section>
+
+<section>
+<p class="eyebrow">01 / The company</p>
+<p class="kicker">הגישה שלנו</p>
+<h2>בית אחד.<span>כתובת אחת.</span></h2>
+<p class="lead">התכנון שלכם, הביצוע שלנו, מהיסודות ועד הגג. פיתוחי חותם מרכזת את עבודות השלד, הגמר, הפיתוח והגגות תחת גורם ביצוע אחד.</p>
+<div class="photo band"><img src="band-company.jpg" alt="" loading="lazy"></div>
+<div class="grid2">
+<div class="item"><b>ליווי הנדסי</b><p>כל פרויקט מלווה על ידי מהנדס מוסמך מטעם החברה, והנהלת החברה נוכחת באתר לאורך כל שלבי הביצוע, מיציקת היסודות ועד מסירת המפתח.</p></div>
+<div class="item"><b>תהליך מתואם</b><p>כל עבודות הבנייה מרוכזות תחת גורם מבצע אחד, בתיאום מלא בין שלבי הביצוע ובהתאם לתכולת עבודה שמוגדרת מראש.</p></div>
+<div class="item"><b>יעילות בביצוע</b><p>שיטת הבנייה מתוכננת לקצר את משך העבודה באתר ואת תקופת העסקת הצוותים. לוחות הזמנים והעלות נגזרים מאופי הפרויקט והיקפו.</p></div>
+<div class="item"><b>התאמה במהלך הבנייה</b><p>השלד מוקם באתר, ולכן ניתן לבחון את החללים במידותיהם בפועל ולהטמיע שינויים, בכפוף לתכנון ולאישורים הנדרשים.</p></div>
+<div class="item"><b>גישה ייחודית לגגות</b><p>אצלנו הגג אינו רק כיסוי לבית. אנו מתכננים ובונים אותו כחלל שמשביח את הנכס: תקרות גבוהות, גגות רעפים חשופים ועליות גג שהופכות למרחב מגורים, לצד הקמה, שיקום ואיטום.</p></div>
+<div class="item"><b>תחושה של בית</b><p>בסיס בטון, ממ״ד וקירות בשכבות כפולות, כחלק אינטגרלי ממעטפת הבנייה.</p></div>
+</div>
+<div class="box"><b>תחומי הפעילות</b><p>בתים פרטיים בני עד שלוש קומות כולל מרתף, תוספות בנייה, והסבת עליות גג לחלל מגורים נוסף בבית קיים.</p></div>
+</section>
+
+<section>
+<p class="eyebrow">02 / Construction</p>
+<p class="kicker">שיטת הבנייה</p>
+<h2>הנדסה מתקדמת.<span>ביצוע מדויק.</span></h2>
+<p class="lead">תהליך בן חמישה שלבים, מהתשתית הראשונה ועד הגג ופיתוח החוץ.</p>
+<div class="photo band"><img src="band-build.jpg" alt="" loading="lazy"></div>
+<div class="steps">
+<div class="step"><div class="num">01</div><b>בסיס קונבנציונלי</b><p>קידוח כלונסאות, יציקת רצפת בטון והקמת ממ״ד מבטון. בשלב זה מבוצעים גם חומה היקפית, בורות ביוב, פילר חשמל ותשתיות הבית.</p></div>
+<div class="step"><div class="num">02</div><b>שלד פלדה ועץ</b><p>הקונסטרוקציה מוקמת באתר על פי התוכנית: פלדה דקת דופן בשילוב עץ ופרופילי גבס מחוזקים.</p></div>
+<div class="step"><div class="num">03</div><b>מעטפת חוץ</b><p>לוחות גבס כחול לחוץ, רשת, דבק צמנטי, טיח ושליכט צבעוני. פירוט השכבות בהמשך.</p></div>
+<div class="step"><div class="num">04</div><b>פנים הבית ותשתיות</b><p>שתי שכבות גבס ירוק בקירות המעטפת; מחיצות גבס ירוק כפול עם בידוד קנאוף בדחיסות 36 ק״ג לפי מפרט החברה. צנרת פקס ואינטרפוצים של גרואה או חמת, חשמל ותאורה שקועה לפי התוכנית, תיאום וחיבור מול חברת החשמל, ריצוף וחיפויים.</p></div>
+<div class="step"><div class="num">05</div><b>גג ופיתוח חוץ</b><p>גגות רעפים, בטון או גג גושני חשוף, כולל איטום. פיתוח סביב הבית: חומה, ריצוף חוץ, שבילי כניסה יצוקים, פרגולות ודקים.</p></div>
+</div>
+<div class="box"><b>כארבעה חודשים</b><p>משך הקמה מוערך של בית, על סמך ניסיון החברה ובהתאם להיקף הפרויקט ולתנאיו. אין בכך התחייבות ללוח זמנים.</p></div>
+<p class="note">החומרים, התכולה והביצוע נקבעים לפי התכנון והמפרט המאושרים של הפרויקט.</p>
+</section>
+
+<section>
+<p class="eyebrow">03 / Building envelope</p>
+<p class="kicker">מפרט מעטפת</p>
+<h2>איכות שמתחילה<span>מבפנים.</span></h2>
+<p class="lead">שכבות הקיר החיצוני, מהגמר החיצוני ועד פנים הבית.</p>
+<div class="layers">
+<div>
+<div class="wall" aria-hidden="true">
+<i style="background:#C9AE86;flex:1.2"><em>1</em></i><i style="background:#D9C9A8;flex:.5"><em>2</em></i><i style="background:#E4DCCB;flex:.9"><em>3</em></i><i style="background:#CFCBC0;flex:.7"><em>4</em></i><i style="background:#8FA3B0;flex:1.4"><em>5</em></i><i style="background:repeating-linear-gradient(0deg,#B9B4A7 0 10px,#D8D3C6 10px 20px);flex:2.2"><em>6</em></i><i style="background:#A9BBA4;flex:1.4"><em>7</em></i>
+</div>
+<p class="note">תרשים שכבות סכמטי להמחשה בלבד · אינו פרט ביצוע הנדסי</p>
+</div>
+<ul class="ll">
+<li><span class="k">01</span><span class="sw" style="background:#C9AE86"></span>שליכט צבעוני בגוון ובטקסטורה לבחירה</li>
+<li><span class="k">02</span><span class="sw" style="background:#D9C9A8"></span>פריימר לשליכט</li>
+<li><span class="k">03</span><span class="sw" style="background:#E4DCCB"></span>טיח החלקה (קזנובה)</li>
+<li><span class="k">04</span><span class="sw" style="background:#CFCBC0"></span>דבק צמנטי עם רשת אינטרגלאס מודבקת</li>
+<li><span class="k">05</span><span class="sw" style="background:#8FA3B0"></span>לוחות גבס כחול לחוץ</li>
+<li><span class="k">06</span><span class="sw" style="background:#B9B4A7"></span>שלד מפלדה דקת דופן ועץ</li>
+<li><span class="k">07</span><span class="sw" style="background:#A9BBA4"></span>שתי שכבות גבס ירוק בצד הפנימי</li>
+</ul>
+</div>
+<div class="box"><b>מעטפת רב־שכבתית</b><p>שילוב של שלד קל, גמר חיצוני בשליכט וקירות פנים בגבס כפול. ההרכב המלא מוצג כאן בשקיפות מלאה, כדי שתדעו ממה בנוי כל קיר בבית.</p></div>
+<p class="note">ההרכב הסופי, עובי השכבות, החיבורים ופרטי הביצוע נקבעים על פי התכנון ההנדסי והמפרט של הפרויקט.</p>
+</section>
+
+<section>
+<p class="eyebrow">04 / Attic conversion</p>
+<p class="kicker">עליות גג</p>
+<h2>מרחב חדש.<span>באותו הבית.</span></h2>
+<p class="lead">החלל שמתחת לגג הרעפים יכול להפוך לסוויטת הורים, לחדרי ילדים או ליחידת דיור נפרדת, בלי לעבור דירה.</p>
+<div class="strip">
+<div><div class="photo"><img src="step30.jpg" alt="" loading="lazy"></div><div class="cap">הקמת השלד</div></div>
+<div><div class="photo"><img src="step35.jpg" alt="" loading="lazy"></div><div class="cap">סגירת הגג</div></div>
+<div><div class="photo"><img src="step29.jpg" alt="" loading="lazy"></div><div class="cap">שלב הגמר</div></div>
+<div><div class="photo"><img src="step5.jpg" alt="" loading="lazy"></div><div class="cap">יחידה מוכנה למגורים</div></div>
+</div>
+<div class="cap">מתוך פרויקטים שביצעה החברה</div>
+<div class="grid2">
+<div class="item"><b>01 / בדיקת הגג</b><p>בחינת החלל והמבנה הקיים, ואפיון האפשרויות לניצולו.</p></div>
+<div class="item"><b>02 / תכנון</b><p>חלוקת חללים, חלונות גג, חדרי רחצה ומטבח, ואומדן לפרויקט.</p></div>
+<div class="item"><b>03 / בנייה</b><p>שלד, חלונות, חשמל, אינסטלציה וגמר. העבודה מתבצעת מעל הבית הקיים, ככל הניתן.</p></div>
+<div class="item"><b>04 / מסירה</b><p>רוב הפרויקטים מושלמים בתוך כ־40 יום מתחילת הבנייה, על סמך ניסיון החברה ובהתאם להיקף הפרויקט ולתנאיו.</p></div>
+</div>
+<p class="note">מימוש עליית הגג כפוף לבדיקת היתכנות, תכנון, היתר ככל שנדרש ואישור הנדסי.</p>
+</section>
+
+<section>
+<p class="eyebrow">05 / Projects &amp; contact</p>
+<p class="kicker">ניסיון בשטח</p>
+<h2>מבית קיים.<span>לאפשרויות חדשות.</span></h2>
+<p class="lead">מבחר פרויקטים של עליות גג שביצעה החברה ברחבי הארץ.</p>
+<div class="trio">
+<div class="photo"><img src="proj9.jpg" alt="" loading="lazy"></div>
+<div class="photo"><img src="proj28.jpg" alt="" loading="lazy"></div>
+<div class="photo"><img src="proj13.jpg" alt="" loading="lazy"></div>
+</div>
+<div class="proj">
+<div>קריית גת<span>90 מ״ר</span></div><div>אשקלון<span>75 מ״ר</span></div>
+<div>אשקלון<span>60 מ״ר</span></div><div>לוד<span>60 מ״ר, כולל פיתוח חוץ</span></div>
+<div>פרדס חנה<span>55 מ״ר</span></div><div>הרצליה<span>45 מ״ר</span></div>
+<div>גן יאשיה<span>עליית גג</span></div><div>קריית אתא<span>עליית גג</span></div>
+</div>
+<div class="box"><b>ראש שקט לאורך הדרך</b><p>החברה פועלת עם ביטוח קבלנים, עובדים מורשים ותעודות הרישוי הנדרשות, ומעניקה אחריות על העבודה בהתאם לתנאי ההתקשרות. החברה עובדת מול חברות הביטוח.</p></div>
+<div class="box"><b>בואו נבנה את הבית שלכם.</b><p>פגישת ייעוץ אישית וקבלת אומדן ראשוני לפרויקט. אדריכלים, מהנדסים ויועצים מוזמנים לפנות אלינו לשיתוף פעולה בביצוע הפרויקטים שתכננו.</p>
+<div class="cta">
+<a class="dark" href="tel:0525143632"><small>גואל</small><span>052-5143632</span></a>
+<a class="light" href="tel:0545065678"><small>משרד</small><span>054-5065678</span></a>
+</div>
+</div>
+</section>
+
+</main>
+
+<footer>
+<img src="logo.svg" alt="פיתוחי חותם">
+פיתוחי חותם בע״מ · בנייה מתקדמת · איכות · אמינות<br>
+<a href="../shita.pdf">להורדת החוברת כ-PDF</a>
+</footer>
+
+</body>
+</html>
