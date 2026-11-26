@@ -117,6 +117,24 @@ dialog::backdrop{background:rgba(31,29,26,.45)}
 .src td,.src th{text-align:center}
 .src td.l{text-align:right}
 .note{font-size:14px;color:var(--muted);margin:10px 0 30px}
+/* deals & month */
+.deal{border-top:1px solid var(--line);margin-top:18px;padding-top:6px}
+.deal h3{font-size:16px;margin:10px 0 2px}
+.deal .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sumc{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:6px 0 16px}
+.sumc div{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+.sumc b{display:block;font-size:22px;color:var(--gold-dk)}.sumc span{font-size:13px;color:var(--ink2)}
+.pay td{text-align:center;font-size:14px}.pay td.l{text-align:right}
+.tag{display:inline-block;border-radius:999px;padding:2px 10px;font-size:13px;font-weight:600}
+.tag.due{background:#F6E3C8;color:#7A4E12}.tag.paid{background:#DDEBDD;color:#2F5A35}.tag.wait{background:var(--sand);color:var(--ink2)}.tag.miss{background:#F3DADA;color:var(--err)}
+.mini{font-size:13px;background:none;border:1px solid var(--line);border-radius:8px;padding:4px 10px;cursor:pointer;margin-inline-start:6px}
+.mini:hover{border-color:var(--gold)}
+.mhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 14px}
+.mhead input{min-height:44px;border:1.5px solid var(--line);border-radius:10px;padding:0 12px;background:var(--white)}
+.msec{margin:0 0 22px}.msec h3{font-size:17px;margin:0 0 8px}
+.mrep td{text-align:center;font-size:14px}.mrep td.l{text-align:right}
+@media print{header.top,.tabs,.mhead button,.filters,.calbar,#toast,#busybar{display:none!important}body{background:#fff}.sumc div,.tbl{border-color:#999}}
+@media (max-width:820px){.sumc{grid-template-columns:1fr 1fr}.deal .row2{grid-template-columns:1fr}}
 /* calendar */
 .calbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 14px}
 .calbar .wk{font-weight:700;font-size:17px;min-width:150px;text-align:center}
@@ -179,6 +197,8 @@ dialog::backdrop{background:rgba(31,29,26,.45)}
 <button role="tab" aria-selected="true" data-tab="leads">לידים</button>
 <button role="tab" aria-selected="false" data-tab="cal">יומן פגישות</button>
 <button role="tab" aria-selected="false" data-tab="sources">מקורות ושותפים</button>
+<button role="tab" aria-selected="false" data-tab="pay">תשלומי שותפים</button>
+<button role="tab" aria-selected="false" data-tab="month">סיכום חודשי</button>
 <button role="tab" aria-selected="false" data-tab="log">יומן פעולות</button>
 </div>
 
@@ -225,6 +245,23 @@ dialog::backdrop{background:rgba(31,29,26,.45)}
 <div class="cal" id="cal"></div>
 </section>
 
+<section id="tab-pay" hidden>
+<p class="calhint">כל ליד שהגיע דרך שותף ונסגר. התגמול משולם חצי בסגירה וחצי אחרי התשלום הראשון של הלקוח. את הסכום, התאריכים והתשלומים מעדכנים בכרטיס הליד, תחת "עסקה ותגמול לשותף".</p>
+<div class="sumc" id="paySum"></div>
+<div class="filters" style="grid-template-columns:1fr 1fr"><select id="payPartner" aria-label="שותף"><option value="">כל השותפים</option></select><select id="payState" aria-label="מצב"><option value="">כל המצבים</option><option value="due">יש לתשלום עכשיו</option><option value="wait">ממתין לתשלום ראשון של הלקוח</option><option value="done">שולם במלואו</option><option value="miss">חסר סכום תגמול</option></select></div>
+<div class="tbl pay"><table>
+<thead><tr><th>שותף</th><th>לקוח</th><th>נסגר</th><th>תגמול</th><th>חצי ראשון (בסגירה)</th><th>חצי שני (אחרי תשלום ראשון)</th></tr></thead>
+<tbody id="payRows"></tbody>
+</table></div>
+<p class="note">"סמן שולם" רושם את תאריך היום. אפשר לתקן את התאריך בכרטיס הליד.</p>
+</section>
+
+<section id="tab-month" hidden>
+<div class="mhead"><label for="mYm"><b>חודש</b></label><input type="month" id="mYm"><button class="btn ghost" type="button" id="mLoad">הצגה</button><span class="sp" style="flex:1"></span><button class="btn ghost" type="button" id="mPrint">הדפסה / PDF</button></div>
+<div class="listmsg" id="mMsg" style="display:none"><span class="spin"></span>מכין את הסיכום...</div>
+<div id="mOut"></div>
+</section>
+
 <section id="tab-log" hidden>
 <p class="calhint">כל כניסה למערכת וכל שינוי בליד נרשמים כאן, עם מי עשה ומתי. נשמר גם בלשונית "יומן שינויים" בגיליון.</p>
 <div class="tbl logt"><table>
@@ -256,6 +293,21 @@ dialog::backdrop{background:rgba(31,29,26,.45)}
 <label for="eNotes">הערות שיחה</label><textarea id="eNotes"></textarea>
 <div class="saveRow"><button class="btn" type="button" id="eSave">שמירה</button><span class="saved" id="eMsg" role="status"></span></div>
 <div class="lastby" id="eLast"></div>
+<div class="deal" id="dDeal">
+<h3>עסקה<span id="dPartnerLbl"></span></h3>
+<div class="row2">
+<div><label for="eClose">תאריך סגירה</label><input type="date" id="eClose"></div>
+<div class="pp"><label for="eReward">תגמול לשותף (₪)</label><input id="eReward" inputmode="numeric" placeholder="סכום כולל"></div>
+</div>
+<div class="pp">
+<label for="eFirst">תאריך התשלום הראשון של הלקוח</label><input type="date" id="eFirst">
+<div class="row2">
+<div><label for="ePaid1">שולם לשותף חצי ראשון</label><input type="date" id="ePaid1"></div>
+<div><label for="ePaid2">שולם לשותף חצי שני</label><input type="date" id="ePaid2"></div>
+</div>
+</div>
+<div class="saveRow"><button class="btn ghost" type="button" id="eDealSave">שמירת פרטי עסקה</button><span class="saved" id="eDealMsg" role="status"></span></div>
+</div>
 </div>
 </div>
 </dialog>
@@ -283,7 +335,7 @@ dialog::backdrop{background:rgba(31,29,26,.45)}
 (function(){
 var API='https://script.google.com/macros/s/AKfycbyNUXPd1BSIjdQEL42h5gQDsNkdEEv_D5m2NzTy1FWrrwUiMT7t7I2DOorCZkyt8O8FnA/exec';
 var KEY='', DATA=null, SORT={k:'date',dir:-1}, FILTER_STAT='', CUR=null;
-var COLS=['date','status','name','phone','city','region','plan','property','permit','budget','when','architect','notes','src','partner','reason','next','talk','id','owner','lastby'];
+var COLS=['date','status','name','phone','city','region','plan','property','permit','budget','when','architect','notes','src','partner','reason','next','talk','id','owner','lastby','close','reward','firstpay','paid1','paid2'];
 var STCLS={'חדש':'s-new','לבדיקה':'s-check','אין מענה':'s-noans','בטיפול':'s-work','נקבעה פגישה':'s-meet','היה בפגישה':'s-met','נסגר':'s-won','לא רלוונטי':'s-lost'};
 var LABELS={region:'אזור',plan:'מה מתכננים',property:'פרטי הנכס',permit:'היתר',budget:'תקציב',when:'מתי מתחילים',architect:'אדריכל',notes:'הערות הלקוח',src:'קוד מקור',partner:'שותף מפנה',reason:'רמת רלוונטיות'};
 function $(id){return document.getElementById(id);}
@@ -316,7 +368,7 @@ function prep(){
   $('me').textContent='מחובר/ת: '+(DATA.me||'');
   var fo=$('fOwner'),co=fo.value;fo.innerHTML='<option value="">אחראי: הכל</option><option value="__me">שלי</option><option value="__none">בלי אחראי</option>'+(DATA.owners||[]).map(function(o){return '<option>'+esc(o)+'</option>';}).join('');fo.value=co;
   $('eOwner').innerHTML='<option value="">בלי אחראי</option>'+(DATA.owners||[]).map(function(o){return '<option>'+esc(o)+'</option>';}).join('');
-  renderLog();
+  renderLog();renderPay();
   var now=new Date();$('upd').textContent='עודכן '+now.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
   var fs=$('fStatus'),cur=fs.value;fs.innerHTML='<option value="">כל הסטטוסים</option>'+DATA.statuses.map(function(s){return '<option>'+esc(s)+'</option>';}).join('');fs.value=cur;
   var ps={};DATA.items.forEach(function(x){if(x.partner)ps[x.partner]=1;});Object.keys(DATA.codes||{}).forEach(function(k){ps[DATA.codes[k]]=1;});
@@ -371,7 +423,7 @@ function openLead(row){
   $('dActs').innerHTML=(tel?'<a class="btn" href="tel:'+tel+'">חיוג '+esc(x.phone)+'</a><a class="btn wa" target="_blank" rel="noopener" href="'+waLink(x)+'">וואטסאפ עם הודעה מוכנה</a>':'<span class="note" style="margin:0">אין טלפון. לפנות דרך פייסבוק או אינסטגרם.</span>');
   $('dActs').insertAdjacentHTML('beforeend','<button class="btn ghost" type="button" id="dBook">קביעת פגישה</button>');
   $('dKv').innerHTML='<dt>יישוב</dt><dd>'+esc(x.city||'לא צוין')+'</dd>'+Object.keys(LABELS).filter(function(k){return x[k]&&k!=='src';}).map(function(k){return '<dt>'+LABELS[k]+'</dt><dd>'+esc(x[k])+'</dd>';}).join('');
-  $('eStatus').value=x.status;$('eOwner').value=x.owner||'';$('eLast').textContent=x.lastby?('עודכן לאחרונה: '+x.lastby):'';$('eNext').value=x.next;$('eNotes').value=x.talk;$('eMsg').textContent='';
+  $('eStatus').value=x.status;$('eOwner').value=x.owner||'';$('eClose').value=x.close||'';$('eReward').value=x.reward||'';$('eFirst').value=x.firstpay||'';$('ePaid1').value=x.paid1||'';$('ePaid2').value=x.paid2||'';$('eDealMsg').textContent='';$('dPartnerLbl').textContent=x.partner?(' ותגמול לשותף: '+x.partner):'';document.querySelectorAll('#dDeal .pp').forEach(function(e){e.hidden=!x.partner;});$('eLast').textContent=x.lastby?('עודכן לאחרונה: '+x.lastby):'';$('eNext').value=x.next;$('eNotes').value=x.talk;$('eMsg').textContent='';
   $('dlg').showModal();
 }
 function save(){
@@ -379,7 +431,7 @@ function save(){
   var p={action:'save',row:x.row,name:x.name,phone:x.phone,status:$('eStatus').value,next:$('eNext').value,notes:$('eNotes').value,owner:$('eOwner').value};
   call(p).then(function(r){
     btnLoad(b,false);
-    if(r.ok){x.status=p.status;x.next=p.next;x.talk=p.notes;x.owner=r.owner;x.lastby=r.lastby;$('eLast').textContent=r.lastby?('עודכן לאחרונה: '+r.lastby):'';$('eMsg').textContent='נשמר';render();toast('הליד נשמר');}
+    if(r.ok){if(p.status==='נסגר'&&!x.close)x.close=today();x.status=p.status;x.next=p.next;x.talk=p.notes;x.owner=r.owner;x.lastby=r.lastby;$('eLast').textContent=r.lastby?('עודכן לאחרונה: '+r.lastby):'';$('eMsg').textContent='נשמר';render();toast('הליד נשמר');}
     else if(r.error==='changed'){$('eMsg').textContent='השורה השתנתה בגיליון. מרעננים, ואז לנסות שוב.';refresh();}
     else $('eMsg').textContent='לא נשמר. אפשר לנסות שוב.';
   }).catch(function(){btnLoad(b,false);$('eMsg').textContent='אין חיבור לשרת. לא נשמר.';});
@@ -391,7 +443,7 @@ $('logout').addEventListener('click',function(){store('pc_key',null);location.re
 $('stats').addEventListener('click',function(e){var b=e.target.closest('.stat');if(!b)return;FILTER_STAT=b.dataset.s;$('fStatus').value='';render();});
 document.querySelector('thead').addEventListener('click',function(e){var th=e.target.closest('th[data-k]');if(!th||th.dataset.k==='phone')return;if(SORT.k===th.dataset.k)SORT.dir*=-1;else{SORT.k=th.dataset.k;SORT.dir=th.dataset.k==='date'?-1:1;}render();});
 function quickStatus(e){var el=e.target;if(!el.matches||!el.matches('select.st'))return;var x=DATA.items.filter(function(i){return String(i.row)===el.dataset.row;})[0];if(!x)return;var prev=x.status,val=el.value;el.className='st '+(STCLS[val]||'')+' saving';el.disabled=true;toast('שומר סטטוס: '+val,null,true);
-  call({action:'save',row:x.row,name:x.name,phone:x.phone,status:val}).then(function(r){el.disabled=false;if(r.ok){x.status=val;if(r.owner!=null){x.owner=r.owner;x.lastby=r.lastby;}render();toast('הסטטוס נשמר: '+val);}else{toast('הסטטוס לא נשמר','err');el.value=prev;el.className='st '+(STCLS[prev]||'');if(r.error==='changed'){toast('השורה השתנתה בגיליון. מרעננים את הרשימה.','err');refresh();}}}).catch(function(){el.disabled=false;el.value=prev;el.className='st '+(STCLS[prev]||'');toast('אין חיבור לשרת. הסטטוס לא נשמר.','err');});}
+  call({action:'save',row:x.row,name:x.name,phone:x.phone,status:val}).then(function(r){el.disabled=false;if(r.ok){x.status=val;if(val==='נסגר'&&!x.close)x.close=today();if(r.owner!=null){x.owner=r.owner;x.lastby=r.lastby;}render();toast('הסטטוס נשמר: '+val);}else{toast('הסטטוס לא נשמר','err');el.value=prev;el.className='st '+(STCLS[prev]||'');if(r.error==='changed'){toast('השורה השתנתה בגיליון. מרעננים את הרשימה.','err');refresh();}}}).catch(function(){el.disabled=false;el.value=prev;el.className='st '+(STCLS[prev]||'');toast('אין חיבור לשרת. הסטטוס לא נשמר.','err');});}
 function rowClick(e){if(e.target.closest('select.st'))return;var r=e.target.closest('[data-row]');if(r)openLead(r.dataset.row);}
 function rowKey(e){if(e.target.closest('select.st'))return;if(e.key==='Enter'){var r=e.target.closest('[data-row]');if(r)openLead(r.dataset.row);}}
 ['rows','cards'].forEach(function(id){$(id).addEventListener('change',quickStatus);$(id).addEventListener('click',rowClick);$(id).addEventListener('keydown',rowKey);});
@@ -475,14 +527,60 @@ function cancelEv(id,btn){
   btn.disabled=true;toast('מבטל את הפגישה...',null,true);
   call({action:'unbook',id:id}).then(function(r){if(r.ok){toast('הפגישה בוטלה');if(r.row){var x=DATA.items.filter(function(i){return String(i.row)===String(r.row);})[0];if(x&&r.status){x.status=r.status;render();}}loadCal();}else{btn.disabled=false;toast('הביטול נכשל','err');}}).catch(function(){btn.disabled=false;toast('אין חיבור לשרת. לא בוטל.','err');});
 }
+function nis(n){n=Number(n)||0;return n.toLocaleString('he-IL')+' ₪';}
+function today(){return ymd(new Date());}
+function payInfo(x){var r=Number(x.reward)||0,h=r/2;var a=x.paid1?'paid':(x.close||x.status==='נסגר')?'due':'wait';var b=x.paid2?'paid':x.firstpay?'due':'wait';return {r:r,h:h,a:a,b:b,miss:!r};}
+function payItems(){return DATA.items.filter(function(x){return x.partner&&(x.status==='נסגר'||x.close||x.reward);});}
+function renderPay(){
+  var L=payItems(),pp=$('payPartner'),cur=pp.value,ps={};L.forEach(function(x){ps[x.partner]=1;});
+  pp.innerHTML='<option value="">כל השותפים</option>'+Object.keys(ps).sort().map(function(p){return '<option>'+esc(p)+'</option>';}).join('');pp.value=cur;
+  var st=$('payState').value,now=0,paid=0,fut=0,miss=0;
+  L.forEach(function(x){var i=payInfo(x);if(i.miss)miss++;[i.a,i.b].forEach(function(s){if(s==='due')now+=i.h;else if(s==='paid')paid+=i.h;else fut+=i.h;});});
+  $('paySum').innerHTML='<div><b>'+nis(now)+'</b><span>לתשלום עכשיו</span></div><div><b>'+nis(fut)+'</b><span>ממתין לתשלום ראשון של לקוח</span></div><div><b>'+nis(paid)+'</b><span>שולם לשותפים</span></div><div><b>'+miss+'</b><span>עסקאות בלי סכום תגמול</span></div>';
+  var F=L.filter(function(x){if(pp.value&&x.partner!==pp.value)return false;var i=payInfo(x);if(st==='due')return i.a==='due'||i.b==='due';if(st==='wait')return i.b==='wait';if(st==='done')return i.a==='paid'&&i.b==='paid';if(st==='miss')return i.miss;return true;});
+  function cell(x,half,s,date){var amt=payInfo(x).h;var lbl=s==='paid'?'<span class="tag paid">שולם '+esc(date)+'</span>':s==='due'?'<span class="tag due">לתשלום'+(amt?' '+nis(amt):'')+'</span><button type="button" class="mini" data-paid="'+x.row+'" data-h="'+half+'">סמן שולם</button>':'<span class="tag wait">'+(half===1?'ממתין לסגירה':'ממתין לתשלום ראשון')+'</span>';return lbl;}
+  $('payRows').innerHTML=F.length?F.map(function(x){var i=payInfo(x);return '<tr><td><b>'+esc(x.partner)+'</b></td><td class="l"><a href="#" data-open="'+x.row+'">'+esc(x.name)+'</a></td><td>'+esc(x.close||'—')+'</td><td>'+(i.miss?'<span class="tag miss">חסר סכום</span>':nis(i.r))+'</td><td>'+cell(x,1,i.a,x.paid1)+'</td><td>'+cell(x,2,i.b,x.paid2)+'</td></tr>';}).join(''):'<tr><td colspan="6" class="empty">אין עדיין עסקאות שנסגרו דרך שותפים.</td></tr>';
+}
+function saveDeal(x,p,btn,done){
+  p.action='deal';p.row=x.row;p.name=x.name;p.phone=x.phone;if(btn)btnLoad(btn,true,'שומר...');
+  call(p).then(function(r){if(btn)btnLoad(btn,false);if(r.ok){x.close=r.v[0];x.reward=r.v[1];x.firstpay=r.v[2];x.paid1=r.v[3];x.paid2=r.v[4];renderPay();toast('פרטי העסקה נשמרו');if(done)done(true);}else{toast(r.error==='changed'?'השורה השתנתה בגיליון. מרעננים.':'לא נשמר','err');if(r.error==='changed')refresh();if(done)done(false);}}).catch(function(){if(btn)btnLoad(btn,false);toast('אין חיבור לשרת. לא נשמר.','err');if(done)done(false);});
+}
+function inMonth(d,ym){return (d||'').indexOf(ym)===0;}
+function loadMonth(){
+  var ym=$('mYm').value;if(!ym)return;$('mMsg').style.display='flex';$('mOut').classList.add('calload');
+  call({action:'month',ym:ym}).then(function(r){$('mMsg').style.display='none';$('mOut').classList.remove('calload');if(!r.ok){toast('לא הצלחנו להכין סיכום','err');return;}renderMonth(ym,r);}).catch(function(){$('mMsg').style.display='none';$('mOut').classList.remove('calload');toast('אין חיבור לשרת','err');});
+}
+function renderMonth(ym,r){
+  var it=DATA.items,nw=it.filter(function(x){return inMonth(x.date,ym);});
+  var MET=['נקבעה פגישה','היה בפגישה','נסגר'];
+  var closed=it.filter(function(x){return inMonth(x.close,ym);});
+  var nowD=new Date(),mt=r.meetings||[],held=mt.filter(function(e){return new Date(e.start)<nowD;}).length;
+  var bySrc={};nw.forEach(function(x){var k=x.srcLabel;bySrc[k]=bySrc[k]||{n:0,ph:0,met:0,won:0};bySrc[k].n++;if((x.phone||'').replace(/\D/g,'').length>=9)bySrc[k].ph++;if(MET.indexOf(x.status)>=0)bySrc[k].met++;if(x.status==='נסגר')bySrc[k].won++;});
+  var users={};(r.log||[]).forEach(function(l){var u=l[1];users[u]=users[u]||{login:0,st:0,meet:0,leads:{}};if(/^כניסה/.test(l[2]))users[u].login++;else{if(/סטטוס:/.test(l[2]))users[u].st++;if(/^נקבעה פגישה/.test(l[2]))users[u].meet++;if(l[3])users[u].leads[l[3]]=1;}});
+  var pay={a:0,b:0,paid:0};it.filter(function(x){return x.partner;}).forEach(function(x){var h=(Number(x.reward)||0)/2;if(inMonth(x.close,ym))pay.a+=h;if(inMonth(x.firstpay,ym))pay.b+=h;if(inMonth(x.paid1,ym))pay.paid+=h;if(inMonth(x.paid2,ym))pay.paid+=h;});
+  var tr=r.traffic||{},trK=Object.keys(tr);
+  var p=ym.split('-'),title=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'][+p[1]-1]+' '+p[0];
+  var h='<div class="msec"><h3>סיכום פעילות · '+esc(title)+'</h3><div class="sumc"><div><b>'+nw.length+'</b><span>לידים חדשים</span></div><div><b>'+mt.length+'</b><span>פגישות ביומן ('+held+' התקיימו)</span></div><div><b>'+closed.length+'</b><span>עסקאות שנסגרו</span></div><div><b>'+nis(pay.a+pay.b)+'</b><span>תגמול לשותפים שנצבר</span></div></div></div>';
+  h+='<div class="msec"><h3>לידים לפי מקור</h3><div class="tbl mrep"><table><thead><tr><th>מקור / שותף</th><th>לידים</th><th>עם טלפון</th><th>נקבעה פגישה ומעלה</th><th>נסגרו</th></tr></thead><tbody>'+(Object.keys(bySrc).length?Object.keys(bySrc).sort(function(a,b){return bySrc[b].n-bySrc[a].n;}).map(function(k){var s=bySrc[k];return '<tr><td class="l">'+esc(k)+'</td><td>'+s.n+'</td><td>'+s.ph+'</td><td>'+s.met+'</td><td>'+s.won+'</td></tr>';}).join(''):'<tr><td colspan="5" class="empty">אין לידים חדשים בחודש הזה.</td></tr>')+'</tbody></table></div></div>';
+  if(trK.length)h+='<div class="msec"><h3>תנועה באתר השאלון</h3><div class="tbl mrep"><table><thead><tr><th>קוד מקור</th><th>כניסות</th><th>התחילו למלא</th><th>השאירו פרטים</th><th>המרה</th></tr></thead><tbody>'+trK.map(function(k){var s=tr[k];var nm=DATA.codes[k]||(k==='direct'?'כניסה ישירה':k==='gag'?'קמפיין עליות גג':k);return '<tr><td class="l">'+esc(nm)+'</td><td>'+s.visit+'</td><td>'+s.start+'</td><td>'+s.lead+'</td><td>'+(s.visit?Math.round(s.lead/s.visit*100)+'%':'—')+'</td></tr>';}).join('')+'</tbody></table></div></div>';
+  h+='<div class="msec"><h3>פעילות הצוות</h3><div class="tbl mrep"><table><thead><tr><th>מי</th><th>כניסות</th><th>לידים שטופלו</th><th>שינויי סטטוס</th><th>פגישות שנקבעו</th></tr></thead><tbody>'+(Object.keys(users).length?Object.keys(users).map(function(u){var s=users[u];return '<tr><td class="l"><b>'+esc(u)+'</b></td><td>'+s.login+'</td><td>'+Object.keys(s.leads).length+'</td><td>'+s.st+'</td><td>'+s.meet+'</td></tr>';}).join(''):'<tr><td colspan="5" class="empty">אין פעולות רשומות בחודש הזה. הרישום התחיל ב-26.11.2026.</td></tr>')+'</tbody></table></div></div>';
+  h+='<div class="msec"><h3>פגישות בחודש</h3><div class="tbl mrep"><table><thead><tr><th>מתי</th><th>פגישה</th><th>מצב הליד היום</th></tr></thead><tbody>'+(mt.length?mt.map(function(e){var d=new Date(e.start),x=e.row&&DATA.items.filter(function(i){return String(i.row)===String(e.row);})[0];return '<tr><td>'+dm(d)+' '+hm(d)+'</td><td class="l">'+esc(e.title.replace(/^פגישה:\s*/,''))+'</td><td>'+esc(x?x.status:'—')+'</td></tr>';}).join(''):'<tr><td colspan="3" class="empty">אין פגישות ביומן בחודש הזה.</td></tr>')+'</tbody></table></div></div>';
+  h+='<div class="msec"><h3>עסקאות ותגמול לשותפים</h3><div class="tbl mrep"><table><thead><tr><th>לקוח</th><th>שותף</th><th>נסגר</th><th>תגמול</th></tr></thead><tbody>'+(closed.length?closed.map(function(x){return '<tr><td class="l">'+esc(x.name)+'</td><td>'+esc(x.partner||'—')+'</td><td>'+esc(x.close)+'</td><td>'+(x.partner?(x.reward?nis(x.reward):'חסר סכום'):'—')+'</td></tr>';}).join(''):'<tr><td colspan="4" class="empty">לא נסגרו עסקאות בחודש הזה.</td></tr>')+'</tbody></table></div><p class="note">החודש נצבר לתשלום לשותפים: חצי ראשון '+nis(pay.a)+', חצי שני '+nis(pay.b)+'. שולם בפועל החודש: '+nis(pay.paid)+'.</p></div>';
+  $('mOut').innerHTML=h;
+}
 function renderLog(){var L=DATA.log||[];$('logRows').innerHTML=L.length?L.map(function(l){return '<tr><td class="c">'+esc(l[0])+'</td><td class="c"><b>'+esc(l[1])+'</b></td><td>'+(l[3]?'<a href="#" data-open="'+esc(l[3])+'">'+esc(l[4]||('שורה '+l[3]))+'</a>':'')+'</td><td>'+esc(l[2])+'</td></tr>';}).join(''):'<tr><td colspan="4" class="empty">אין עדיין פעולות.</td></tr>';}
-function showTab(name){document.querySelectorAll('.tabs button').forEach(function(o){o.setAttribute('aria-selected',o.dataset.tab===name?'true':'false');});['leads','cal','sources','log'].forEach(function(n){$('tab-'+n).hidden=n!==name;});if(name==='cal')loadCal();}
+function showTab(name){document.querySelectorAll('.tabs button').forEach(function(o){o.setAttribute('aria-selected',o.dataset.tab===name?'true':'false');});['leads','cal','sources','log','pay','month'].forEach(function(n){$('tab-'+n).hidden=n!==name;});if(name==='cal')loadCal();if(name==='pay')renderPay();if(name==='month'){if(!$('mYm').value)$('mYm').value=ymd(new Date()).slice(0,7);loadMonth();}}
 $('wkPrev').addEventListener('click',function(){WK=addDays(WK,-7);loadCal();});
 $('wkNext').addEventListener('click',function(){WK=addDays(WK,7);loadCal();});
 $('wkToday').addEventListener('click',function(){WK=weekStart(new Date());loadCal();});
 $('bkNew').addEventListener('click',function(){bkOpen(null);});
 $('cal').addEventListener('click',function(e){var f=e.target.closest('[data-d]');if(f){bkOpen(null,f.dataset.d,f.dataset.t||'');return;}var o=e.target.closest('[data-open]');if(o){openLead(o.dataset.open);return;}var c=e.target.closest('[data-cx]');if(c)cancelEv(c.dataset.cx,c);});
 $('bkQ').addEventListener('input',bkList);
+$('payPartner').addEventListener('change',renderPay);$('payState').addEventListener('change',renderPay);
+$('payRows').addEventListener('click',function(e){var a=e.target.closest('[data-open]');if(a){e.preventDefault();openLead(a.dataset.open);return;}var b=e.target.closest('[data-paid]');if(!b)return;var x=DATA.items.filter(function(i){return String(i.row)===b.dataset.paid;})[0];if(!x)return;var p={};p[b.dataset.h==='1'?'paid1':'paid2']=today();if(!confirm('לסמן ששולם לשותף '+x.partner+' החצי '+(b.dataset.h==='1'?'הראשון':'השני')+' על '+x.name+'?'))return;saveDeal(x,p,b);});
+$('eDealSave').addEventListener('click',function(){if(!CUR)return;var p={close:$('eClose').value};if(CUR.partner){p.reward=$('eReward').value;p.firstpay=$('eFirst').value;p.paid1=$('ePaid1').value;p.paid2=$('ePaid2').value;}saveDeal(CUR,p,$('eDealSave'),function(ok){$('eDealMsg').textContent=ok?'נשמר':'';});});
+$('mLoad').addEventListener('click',loadMonth);$('mYm').addEventListener('change',loadMonth);$('mPrint').addEventListener('click',function(){window.print();});
+$('mOut').addEventListener('click',function(e){var a=e.target.closest('[data-open]');if(a){e.preventDefault();openLead(a.dataset.open);}});
 $('logRows').addEventListener('click',function(e){var a=e.target.closest('[data-open]');if(a){e.preventDefault();openLead(a.dataset.open);}});
 $('bkLead').addEventListener('change',function(){BKROW=this.value;var x=DATA.items.filter(function(i){return String(i.row)===String(BKROW);})[0];if(x&&!$('bkAddr').value.trim())$('bkAddr').value=x.city?(', '+x.city):'';});
 $('bkClose').addEventListener('click',function(){$('bk').close();});
