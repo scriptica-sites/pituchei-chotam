@@ -83,6 +83,12 @@ footer a{white-space:nowrap}
 img.logo,.brand img.logo{height:88px;width:auto;display:block}
 @media (max-width:560px){img.logo,.brand img.logo{height:76px}}
 </style>
+<!-- Meta Pixel: פיתוחי חותם - שאלון -->
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','1623083018977894');fbq('track','PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none" alt="" src="https://www.facebook.com/tr?id=1623083018977894&ev=PageView&noscript=1"></noscript>
 </head>
 <body>
 <header class="top">
@@ -237,7 +243,7 @@ function pick(e){
   setTimeout(function(){ i++; if(i<Q.length) render(); else finish(); },380);
 }
 document.getElementById('startBtn').addEventListener('click',function(){document.getElementById('quiz').scrollIntoView({behavior:'smooth'});document.getElementById('f-name').focus({preventScroll:true});});
-document.getElementById('f-name').addEventListener('focus',function(){ if(!started){started=true;send({type:'event',event:'start'}).catch(function(){});} });
+document.getElementById('f-name').addEventListener('focus',function(){ if(!started){started=true;send({type:'event',event:'start'}).catch(function(){});try{window.fbq&&fbq('trackCustom','StartForm');}catch(x){}} });
 function normPhone(p){var d=(p||'').replace(/\D/g,'');if(d.indexOf('972')===0)d='0'+d.slice(3);return /^05\d{8}$/.test(d)?d.slice(0,3)+'-'+d.slice(3):'';}
 
 form.addEventListener('submit',function(e){
@@ -257,7 +263,7 @@ form.addEventListener('submit',function(e){
         plan:A.plan||'',region:A.region||'',tab:'check',reason:classify()})
   .then(function(res){
     if(!res||res.ok!==true) throw new Error('bad');
-    ID=id; CITY=city; form.hidden=true; document.body.classList.add('inquiz'); window.scrollTo(0,0);
+    ID=id; CITY=city; form.hidden=true; try{window.fbq&&fbq('track','Lead',{content_name:A.plan||'כללי'});}catch(x){} document.body.classList.add('inquiz'); window.scrollTo(0,0);
     var first=name.split(' ')[0];
     document.getElementById('doneTitle').textContent='תודה, '+first+'. פנייתכם התקבלה.';
     document.getElementById('qintroT').textContent='תודה, '+first+'. פנייתכם התקבלה.';
