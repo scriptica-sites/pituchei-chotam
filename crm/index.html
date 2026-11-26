@@ -135,6 +135,7 @@ dialog::backdrop{background:rgba(31,29,26,.45)}
 .mrep td{text-align:center;font-size:14px}.mrep td.l{text-align:right}
 @media print{header.top,.tabs,.mhead button,.filters,.calbar,#toast,#busybar{display:none!important}body{background:#fff}.sumc div,.tbl{border-color:#999}}
 @media (max-width:820px){.sumc{grid-template-columns:1fr 1fr}.deal .row2{grid-template-columns:1fr}}
+body.nopay .payonly{display:none!important}
 /* calendar */
 .calbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 14px}
 .calbar .wk{font-weight:700;font-size:17px;min-width:150px;text-align:center}
@@ -355,19 +356,20 @@ function login(code){
   return call({action:'list',login:true}).then(function(r){
     btnLoad($('lbtn'),false);$('lstat').textContent='';
     if(!r.ok){$('lerr').textContent=r.error==='locked'?'יותר מדי ניסיונות. אפשר לנסות שוב בעוד 10 דקות.':'קוד שגוי.';store('pc_key',null);return;}
-    store('pc_key',KEY);DATA=r;prep();$('login').hidden=true;$('app').hidden=false;render();
+    store('pc_key',KEY);store('pc_data',JSON.stringify(r));DATA=r;prep();$('login').hidden=true;$('app').hidden=false;render();
   }).catch(function(){btnLoad($('lbtn'),false);$('lstat').textContent='';$('lerr').textContent='אין חיבור לשרת. אפשר לנסות שוב.';});
 }
 function refresh(){
   btnLoad($('refresh'),true,'מרענן...');document.body.classList.add('listing');
   function done(){btnLoad($('refresh'),false);document.body.classList.remove('listing');}
-  return call({action:'list'}).then(function(r){done();if(r.ok){DATA=r;prep();render();toast('הרשימה עודכנה');}else toast('הרענון נכשל. אפשר לנסות שוב.','err');}).catch(function(){done();toast('אין חיבור לשרת. אפשר לנסות שוב.','err');});
+  return call({action:'list'}).then(function(r){done();if(r.ok){store('pc_data',JSON.stringify(r));DATA=r;prep();render();toast('הרשימה עודכנה');}else toast('הרענון נכשל. אפשר לנסות שוב.','err');}).catch(function(){done();toast('אין חיבור לשרת. אפשר לנסות שוב.','err');});
 }
 function prep(){
   DATA.items=DATA.leads.map(function(l){var o={row:l.row};COLS.forEach(function(c,i){o[c]=l.v[i]||'';});o.level=level(o);o.srcLabel=srcName(o);if(!o.status)o.status='חדש';return o;});
   $('me').textContent='מחובר/ת: '+(DATA.me||'');
   var fo=$('fOwner'),co=fo.value;fo.innerHTML='<option value="">אחראי: הכל</option><option value="__me">שלי</option><option value="__none">בלי אחראי</option>'+(DATA.owners||[]).map(function(o){return '<option>'+esc(o)+'</option>';}).join('');fo.value=co;
   $('eOwner').innerHTML='<option value="">בלי אחראי</option>'+(DATA.owners||[]).map(function(o){return '<option>'+esc(o)+'</option>';}).join('');
+  var cp=!!DATA.canPay;document.querySelector('.tabs [data-tab=pay]').hidden=!cp;document.body.classList.toggle('nopay',!cp);
   renderLog();renderPay();
   var now=new Date();$('upd').textContent='עודכן '+now.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
   var fs=$('fStatus'),cur=fs.value;fs.innerHTML='<option value="">כל הסטטוסים</option>'+DATA.statuses.map(function(s){return '<option>'+esc(s)+'</option>';}).join('');fs.value=cur;
@@ -423,7 +425,7 @@ function openLead(row){
   $('dActs').innerHTML=(tel?'<a class="btn" href="tel:'+tel+'">חיוג '+esc(x.phone)+'</a><a class="btn wa" target="_blank" rel="noopener" href="'+waLink(x)+'">וואטסאפ עם הודעה מוכנה</a>':'<span class="note" style="margin:0">אין טלפון. לפנות דרך פייסבוק או אינסטגרם.</span>');
   $('dActs').insertAdjacentHTML('beforeend','<button class="btn ghost" type="button" id="dBook">קביעת פגישה</button>');
   $('dKv').innerHTML='<dt>יישוב</dt><dd>'+esc(x.city||'לא צוין')+'</dd>'+Object.keys(LABELS).filter(function(k){return x[k]&&k!=='src';}).map(function(k){return '<dt>'+LABELS[k]+'</dt><dd>'+esc(x[k])+'</dd>';}).join('');
-  $('eStatus').value=x.status;$('eOwner').value=x.owner||'';$('eClose').value=x.close||'';$('eReward').value=x.reward||'';$('eFirst').value=x.firstpay||'';$('ePaid1').value=x.paid1||'';$('ePaid2').value=x.paid2||'';$('eDealMsg').textContent='';$('dPartnerLbl').textContent=x.partner?(' ותגמול לשותף: '+x.partner):'';document.querySelectorAll('#dDeal .pp').forEach(function(e){e.hidden=!x.partner;});$('eLast').textContent=x.lastby?('עודכן לאחרונה: '+x.lastby):'';$('eNext').value=x.next;$('eNotes').value=x.talk;$('eMsg').textContent='';
+  $('eStatus').value=x.status;$('eOwner').value=x.owner||'';$('eClose').value=x.close||'';$('eReward').value=x.reward||'';$('eFirst').value=x.firstpay||'';$('ePaid1').value=x.paid1||'';$('ePaid2').value=x.paid2||'';$('eDealMsg').textContent='';$('dPartnerLbl').textContent=x.partner?((DATA.canPay?' ותגמול לשותף: ':' דרך שותף: ')+x.partner):'';document.querySelectorAll('#dDeal .pp').forEach(function(e){e.hidden=!x.partner||!DATA.canPay;});$('eLast').textContent=x.lastby?('עודכן לאחרונה: '+x.lastby):'';$('eNext').value=x.next;$('eNotes').value=x.talk;$('eMsg').textContent='';
   $('dlg').showModal();
 }
 function save(){
@@ -438,7 +440,7 @@ function save(){
 }
 $('lform').addEventListener('submit',function(e){e.preventDefault();login($('code').value);});
 $('refresh').addEventListener('click',refresh);
-$('logout').addEventListener('click',function(){store('pc_key',null);location.reload();});
+$('logout').addEventListener('click',function(){store('pc_key',null);store('pc_data',null);location.reload();});
 ['q','fStatus','fPartner','fSource','fPhone','fOwner'].forEach(function(id){$(id).addEventListener('input',function(){if(id==='fStatus')FILTER_STAT='';render();});});
 $('stats').addEventListener('click',function(e){var b=e.target.closest('.stat');if(!b)return;FILTER_STAT=b.dataset.s;$('fStatus').value='';render();});
 document.querySelector('thead').addEventListener('click',function(e){var th=e.target.closest('th[data-k]');if(!th||th.dataset.k==='phone')return;if(SORT.k===th.dataset.k)SORT.dir*=-1;else{SORT.k=th.dataset.k;SORT.dir=th.dataset.k==='date'?-1:1;}render();});
@@ -560,12 +562,12 @@ function renderMonth(ym,r){
   var pay={a:0,b:0,paid:0};it.filter(function(x){return x.partner;}).forEach(function(x){var h=(Number(x.reward)||0)/2;if(inMonth(x.close,ym))pay.a+=h;if(inMonth(x.firstpay,ym))pay.b+=h;if(inMonth(x.paid1,ym))pay.paid+=h;if(inMonth(x.paid2,ym))pay.paid+=h;});
   var tr=r.traffic||{},trK=Object.keys(tr);
   var p=ym.split('-'),title=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'][+p[1]-1]+' '+p[0];
-  var h='<div class="msec"><h3>סיכום פעילות · '+esc(title)+'</h3><div class="sumc"><div><b>'+nw.length+'</b><span>לידים חדשים</span></div><div><b>'+mt.length+'</b><span>פגישות ביומן ('+held+' התקיימו)</span></div><div><b>'+closed.length+'</b><span>עסקאות שנסגרו</span></div><div><b>'+nis(pay.a+pay.b)+'</b><span>תגמול לשותפים שנצבר</span></div></div></div>';
+  var h='<div class="msec"><h3>סיכום פעילות · '+esc(title)+'</h3><div class="sumc"><div><b>'+nw.length+'</b><span>לידים חדשים</span></div><div><b>'+mt.length+'</b><span>פגישות ביומן ('+held+' התקיימו)</span></div><div><b>'+closed.length+'</b><span>עסקאות שנסגרו</span></div><div class="payonly"><b>'+nis(pay.a+pay.b)+'</b><span>תגמול לשותפים שנצבר</span></div></div></div>';
   h+='<div class="msec"><h3>לידים לפי מקור</h3><div class="tbl mrep"><table><thead><tr><th>מקור / שותף</th><th>לידים</th><th>עם טלפון</th><th>נקבעה פגישה ומעלה</th><th>נסגרו</th></tr></thead><tbody>'+(Object.keys(bySrc).length?Object.keys(bySrc).sort(function(a,b){return bySrc[b].n-bySrc[a].n;}).map(function(k){var s=bySrc[k];return '<tr><td class="l">'+esc(k)+'</td><td>'+s.n+'</td><td>'+s.ph+'</td><td>'+s.met+'</td><td>'+s.won+'</td></tr>';}).join(''):'<tr><td colspan="5" class="empty">אין לידים חדשים בחודש הזה.</td></tr>')+'</tbody></table></div></div>';
   if(trK.length)h+='<div class="msec"><h3>תנועה באתר השאלון</h3><div class="tbl mrep"><table><thead><tr><th>קוד מקור</th><th>כניסות</th><th>התחילו למלא</th><th>השאירו פרטים</th><th>המרה</th></tr></thead><tbody>'+trK.map(function(k){var s=tr[k];var nm=DATA.codes[k]||(k==='direct'?'כניסה ישירה':k==='gag'?'קמפיין עליות גג':k);return '<tr><td class="l">'+esc(nm)+'</td><td>'+s.visit+'</td><td>'+s.start+'</td><td>'+s.lead+'</td><td>'+(s.visit?Math.round(s.lead/s.visit*100)+'%':'—')+'</td></tr>';}).join('')+'</tbody></table></div></div>';
   h+='<div class="msec"><h3>פעילות הצוות</h3><div class="tbl mrep"><table><thead><tr><th>מי</th><th>כניסות</th><th>לידים שטופלו</th><th>שינויי סטטוס</th><th>פגישות שנקבעו</th></tr></thead><tbody>'+(Object.keys(users).length?Object.keys(users).map(function(u){var s=users[u];return '<tr><td class="l"><b>'+esc(u)+'</b></td><td>'+s.login+'</td><td>'+Object.keys(s.leads).length+'</td><td>'+s.st+'</td><td>'+s.meet+'</td></tr>';}).join(''):'<tr><td colspan="5" class="empty">אין פעולות רשומות בחודש הזה. הרישום התחיל ב-26.11.2026.</td></tr>')+'</tbody></table></div></div>';
   h+='<div class="msec"><h3>פגישות בחודש</h3><div class="tbl mrep"><table><thead><tr><th>מתי</th><th>פגישה</th><th>מצב הליד היום</th></tr></thead><tbody>'+(mt.length?mt.map(function(e){var d=new Date(e.start),x=e.row&&DATA.items.filter(function(i){return String(i.row)===String(e.row);})[0];return '<tr><td>'+dm(d)+' '+hm(d)+'</td><td class="l">'+esc(e.title.replace(/^פגישה:\s*/,''))+'</td><td>'+esc(x?x.status:'—')+'</td></tr>';}).join(''):'<tr><td colspan="3" class="empty">אין פגישות ביומן בחודש הזה.</td></tr>')+'</tbody></table></div></div>';
-  h+='<div class="msec"><h3>עסקאות ותגמול לשותפים</h3><div class="tbl mrep"><table><thead><tr><th>לקוח</th><th>שותף</th><th>נסגר</th><th>תגמול</th></tr></thead><tbody>'+(closed.length?closed.map(function(x){return '<tr><td class="l">'+esc(x.name)+'</td><td>'+esc(x.partner||'—')+'</td><td>'+esc(x.close)+'</td><td>'+(x.partner?(x.reward?nis(x.reward):'חסר סכום'):'—')+'</td></tr>';}).join(''):'<tr><td colspan="4" class="empty">לא נסגרו עסקאות בחודש הזה.</td></tr>')+'</tbody></table></div><p class="note">החודש נצבר לתשלום לשותפים: חצי ראשון '+nis(pay.a)+', חצי שני '+nis(pay.b)+'. שולם בפועל החודש: '+nis(pay.paid)+'.</p></div>';
+  h+='<div class="msec payonly"><h3>עסקאות ותגמול לשותפים</h3><div class="tbl mrep"><table><thead><tr><th>לקוח</th><th>שותף</th><th>נסגר</th><th>תגמול</th></tr></thead><tbody>'+(closed.length?closed.map(function(x){return '<tr><td class="l">'+esc(x.name)+'</td><td>'+esc(x.partner||'—')+'</td><td>'+esc(x.close)+'</td><td>'+(x.partner?(x.reward?nis(x.reward):'חסר סכום'):'—')+'</td></tr>';}).join(''):'<tr><td colspan="4" class="empty">לא נסגרו עסקאות בחודש הזה.</td></tr>')+'</tbody></table></div><p class="note">החודש נצבר לתשלום לשותפים: חצי ראשון '+nis(pay.a)+', חצי שני '+nis(pay.b)+'. שולם בפועל החודש: '+nis(pay.paid)+'.</p></div>';
   $('mOut').innerHTML=h;
 }
 function renderLog(){var L=DATA.log||[];$('logRows').innerHTML=L.length?L.map(function(l){return '<tr><td class="c">'+esc(l[0])+'</td><td class="c"><b>'+esc(l[1])+'</b></td><td>'+(l[3]?'<a href="#" data-open="'+esc(l[3])+'">'+esc(l[4]||('שורה '+l[3]))+'</a>':'')+'</td><td>'+esc(l[2])+'</td></tr>';}).join(''):'<tr><td colspan="4" class="empty">אין עדיין פעולות.</td></tr>';}
@@ -578,7 +580,7 @@ $('cal').addEventListener('click',function(e){var f=e.target.closest('[data-d]')
 $('bkQ').addEventListener('input',bkList);
 $('payPartner').addEventListener('change',renderPay);$('payState').addEventListener('change',renderPay);
 $('payRows').addEventListener('click',function(e){var a=e.target.closest('[data-open]');if(a){e.preventDefault();openLead(a.dataset.open);return;}var b=e.target.closest('[data-paid]');if(!b)return;var x=DATA.items.filter(function(i){return String(i.row)===b.dataset.paid;})[0];if(!x)return;var p={};p[b.dataset.h==='1'?'paid1':'paid2']=today();if(!confirm('לסמן ששולם לשותף '+x.partner+' החצי '+(b.dataset.h==='1'?'הראשון':'השני')+' על '+x.name+'?'))return;saveDeal(x,p,b);});
-$('eDealSave').addEventListener('click',function(){if(!CUR)return;var p={close:$('eClose').value};if(CUR.partner){p.reward=$('eReward').value;p.firstpay=$('eFirst').value;p.paid1=$('ePaid1').value;p.paid2=$('ePaid2').value;}saveDeal(CUR,p,$('eDealSave'),function(ok){$('eDealMsg').textContent=ok?'נשמר':'';});});
+$('eDealSave').addEventListener('click',function(){if(!CUR)return;var p={close:$('eClose').value};if(CUR.partner&&DATA.canPay){p.reward=$('eReward').value;p.firstpay=$('eFirst').value;p.paid1=$('ePaid1').value;p.paid2=$('ePaid2').value;}saveDeal(CUR,p,$('eDealSave'),function(ok){$('eDealMsg').textContent=ok?'נשמר':'';});});
 $('mLoad').addEventListener('click',loadMonth);$('mYm').addEventListener('change',loadMonth);$('mPrint').addEventListener('click',function(){window.print();});
 $('mOut').addEventListener('click',function(e){var a=e.target.closest('[data-open]');if(a){e.preventDefault();openLead(a.dataset.open);}});
 $('logRows').addEventListener('click',function(e){var a=e.target.closest('[data-open]');if(a){e.preventDefault();openLead(a.dataset.open);}});
@@ -586,7 +588,10 @@ $('bkLead').addEventListener('change',function(){BKROW=this.value;var x=DATA.ite
 $('bkClose').addEventListener('click',function(){$('bk').close();});
 $('bkSave').addEventListener('click',function(){bkSave(false);});
 $('dActs').addEventListener('click',function(e){if(e.target.id==='dBook'&&CUR)bkOpen(CUR.row);});
-var saved=load('pc_key');if(saved){$('code').value=saved;login(saved);}
+var saved=load('pc_key'),cached=null;try{cached=JSON.parse(load('pc_data')||'null');}catch(e){}
+if(saved&&cached&&cached.ok){KEY=saved;DATA=cached;prep();$('login').hidden=true;$('app').hidden=false;render();$('upd').textContent='מעדכן...';
+  call({action:'list'}).then(function(r){if(r.ok){store('pc_data',JSON.stringify(r));DATA=r;prep();render();if(!$('tab-pay').hidden)renderPay();}else if(r.error==='key'){store('pc_key',null);store('pc_data',null);location.reload();}}).catch(function(){$('upd').textContent='אין חיבור, מוצג מידע שמור';});}
+else if(saved){$('code').value=saved;login(saved);}
 })();
 </script>
 </body>
